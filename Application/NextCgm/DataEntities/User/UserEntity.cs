@@ -36,7 +36,11 @@ namespace NextCgm.DataEntities.User
 
         public Guid ProvinceStateListID { get; set; }
 
-        public string ApiKeyForNightScout { get; set; } = string.Empty;
+        public string ApiKeyForNightScout { get; set; } = string.Empty; // like oros450 onlylowesrcase, no special characters, and must be unique across all users. This is used for authenticating API requests from the user's Nightscout instance to the backend server, and for mapping to the user's container and database. This can be a combination of the user's first name, last name, and a unique identifier, such as Dolfie1234567890, where Dolfie is the user's first name, and 1234567890 is a unique identifier for this user. This is used to create a unique API key and to identify the user in the system.
+
+        public string UserSubDomain { get; set; } = string.Empty; // like dolfie.nextcgm.com, where Dolfie is the user subdomain, and nextcgm.com is the main domain. This is used for mapping to the host machine and for creating a unique URL for the user to access their container.
+
+        // both the apikey and UserSubDomain generate a url like this https://oros450.dolfie.nextgcm.com/api/v1/ 
 
         public Guid TimeZoneID { get; set; }
 
