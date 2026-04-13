@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NextCGM - Premium Nightscout Hosting</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0ea5e9',
+                        secondary: '#0284c7',
+                        dark: '#0f172a',
+                        light: '#f8fafc'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-text {
+            background: linear-gradient(to right, #0ea5e9, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="bg-light text-slate-800 font-sans antialiased">
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm fixed w-full z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex-shrink-0 flex items-center">
+                    <span class="text-2xl font-bold text-primary">Next<span class="text-slate-800">CGM</span></span>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#how-it-works" class="text-slate-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">How It Works</a>
+                    <a href="#compatibility" class="text-slate-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">Compatibility</a>
+                    <a href="#features" class="text-slate-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">Features</a>
+                </div>
+                <div>
+                    <a href="mailto:nextcgmsa@outlook.com" class="bg-primary hover:bg-secondary text-white px-6 py-2 rounded-full font-medium transition-colors shadow-md hover:shadow-lg">Contact Us</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-32 pb-20 lg:pt-48 lg:pb-32 bg-gradient-to-br from-slate-50 to-blue-50 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div class="text-center max-w-3xl mx-auto">
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-6">
+                    Elevate Your T1D Management with <span class="gradient-text">NextCGM</span>
+                </h1>
+                <p class="text-xl md:text-2xl text-slate-600 mb-8 font-light">
+                    The seamless bridge between open-source innovation and personal peace of mind.
+                </p>
+                <p class="text-lg text-slate-500 mb-10 leading-relaxed">
+                    Managing diabetes is a full-time job; managing servers shouldn't be. We’ve built a premium home for your Nightscout site, designed to take the complexity out of data sharing so you can focus on the moments that matter.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <a href="mailto:nextcgmsa@outlook.com" class="bg-primary hover:bg-secondary text-white px-8 py-4 rounded-full text-lg font-semibold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                        Contact Us to Launch
+                    </a>
+                    <a href="#how-it-works" class="bg-white text-slate-700 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 px-8 py-4 rounded-full text-lg font-semibold transition-all shadow-sm hover:shadow-md">
+                        Learn More
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section id="how-it-works" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">How the Magic Happens</h2>
+                <p class="text-xl text-slate-600">xDrip+ & The Cloud</p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-12 items-center">
+                <div class="text-center p-6 rounded-2xl bg-blue-50 border border-blue-100">
+                    <div class="w-16 h-16 bg-primary text-white rounded-full flex items-center justify-center mx-auto mb-6 text-2xl shadow-lg">
+                        <i class="fa-brands fa-bluetooth-b"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">1. Collect</h3>
+                    <p class="text-slate-600">xDrip+ acts as your local "command center," collecting raw data directly from your sensor via Bluetooth or as a companion app.</p>
+                </div>
+                <div class="text-center p-6 rounded-2xl bg-blue-50 border border-blue-100">
+                    <div class="w-16 h-16 bg-primary text-white rounded-full flex items-center justify-center mx-auto mb-6 text-2xl shadow-lg">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">2. Transmit</h3>
+                    <p class="text-slate-600">Once xDrip+ has your readings, it securely beams them to your NextCGM cloud server.</p>
+                </div>
+                <div class="text-center p-6 rounded-2xl bg-blue-50 border border-blue-100">
+                    <div class="w-16 h-16 bg-primary text-white rounded-full flex items-center justify-center mx-auto mb-6 text-2xl shadow-lg">
+                        <i class="fa-solid fa-globe"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">3. Share</h3>
+                    <p class="text-slate-600">A live, "always-on" secure unique link allows you, your family, or doctor to view levels from any browser. It's a mobile-compatible website that can be downloaded as a PWA, giving you and your followers an "App-like feel".</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Compatibility -->
+    <section id="compatibility" class="py-20 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row items-center gap-12">
+                <div class="md:w-1/2">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-6">Broad Compatibility</h2>
+                    <p class="text-lg text-slate-600 mb-8">
+                        xDrip+ supports a massive range of CGMs, ensuring you can use the hardware you love with the cloud you deserve.
+                    </p>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <i class="fa-solid fa-circle-check text-green-500 mt-1 mr-3"></i>
+                            <div>
+                                <span class="font-bold text-slate-800">Dexcom:</span>
+                                <span class="text-slate-600"> G6, G7, G4, G5, and Dexcom ONE.</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa-solid fa-circle-check text-green-500 mt-1 mr-3"></i>
+                            <div>
+                                <span class="font-bold text-slate-800">Abbott Freestyle Libre:</span>
+                                <span class="text-slate-600"> Libre 1, Libre 2 (EU), and Libre 3 (via companion apps).</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa-solid fa-circle-check text-green-500 mt-1 mr-3"></i>
+                            <div>
+                                <span class="font-bold text-slate-800">Medtronic:</span>
+                                <span class="text-slate-600"> Guardian sensors (via CareLink or companion bridge).</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa-solid fa-circle-check text-green-500 mt-1 mr-3"></i>
+                            <div>
+                                <span class="font-bold text-slate-800">Linix CGM:</span>
+                                <span class="text-slate-600"> Fully supported for seamless integration.</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa-solid fa-circle-check text-green-500 mt-1 mr-3"></i>
+                            <div>
+                                <span class="font-bold text-slate-800">Other Sensors:</span>
+                                <span class="text-slate-600"> Medtrum A6/A7, Eversense, Aidex, and Bluetooth-enabled meters.</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="md:w-1/2 bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-slate-50 p-4 rounded-lg flex items-center justify-center text-center font-semibold text-slate-700 border border-slate-200">Dexcom</div>
+                        <div class="bg-slate-50 p-4 rounded-lg flex items-center justify-center text-center font-semibold text-slate-700 border border-slate-200">Freestyle Libre</div>
+                        <div class="bg-slate-50 p-4 rounded-lg flex items-center justify-center text-center font-semibold text-slate-700 border border-slate-200">Medtronic</div>
+                        <div class="bg-slate-50 p-4 rounded-lg flex items-center justify-center text-center font-semibold text-slate-700 border border-slate-200">Linix CGM</div>
+                        <div class="bg-slate-50 p-4 rounded-lg flex items-center justify-center text-center font-semibold text-slate-700 border border-slate-200">Eversense</div>
+                        <div class="bg-slate-50 p-4 rounded-lg flex items-center justify-center text-center font-semibold text-slate-700 border border-slate-200">Other Sensors</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <!-- Data Section -->
+            <div class="mb-24">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4">Data That Works for You</h2>
+                    <p class="text-xl text-slate-600">Long-Term Insights</p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="p-8 rounded-2xl bg-white shadow-lg border border-slate-100 hover:shadow-xl transition-shadow">
+                        <i class="fa-solid fa-database text-3xl text-primary mb-4"></i>
+                        <h3 class="text-xl font-bold mb-3">Months of Storage</h3>
+                        <p class="text-slate-600">Standard apps limit you to 14 days. We provide high-capacity databases so you can store months—or even years—of history.</p>
+                    </div>
+                    <div class="p-8 rounded-2xl bg-white shadow-lg border border-slate-100 hover:shadow-xl transition-shadow">
+                        <i class="fa-solid fa-chart-pie text-3xl text-primary mb-4"></i>
+                        <h3 class="text-xl font-bold mb-3">Detailed Reporting</h3>
+                        <p class="text-slate-600">Dive deep into "A1C Estimates," "Time in Range," and "Daily Patterns" to truly understand your management.</p>
+                    </div>
+                    <div class="p-8 rounded-2xl bg-white shadow-lg border border-slate-100 hover:shadow-xl transition-shadow">
+                        <i class="fa-solid fa-magnifying-glass-chart text-3xl text-primary mb-4"></i>
+                        <h3 class="text-xl font-bold mb-3">Spot the Trends</h3>
+                        <p class="text-slate-600">See how seasonal changes, medication adjustments, or lifestyle shifts affect your management over time.</p>
+                    </div>
+                    <div class="p-8 rounded-2xl bg-white shadow-lg border border-slate-100 hover:shadow-xl transition-shadow">
+                        <i class="fa-solid fa-file-invoice text-3xl text-primary mb-4"></i>
+                        <h3 class="text-xl font-bold mb-3">Extensive Reporting Tools</h3>
+                        <p class="text-slate-600">Generate comprehensive PDF reports for your endocrinologist, export data to CSV, and utilize advanced analytical views.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Turn-Key Section -->
+            <div>
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4">The Power of Turn-Key</h2>
+                    <p class="text-xl text-slate-600">Why "NextCGM"?</p>
+                </div>
+                <div class="bg-dark rounded-3xl p-8 md:p-12 text-white shadow-2xl">
+                    <p class="text-lg text-slate-300 mb-10 text-center max-w-3xl mx-auto">
+                        The traditional "DIY" route for Nightscout involves navigating complex code, managing cloud subscriptions, and troubleshooting server errors. NextCGM transforms that struggle into a "Turn-Key" reality.
+                    </p>
+                    <div class="grid sm:grid-cols-2 gap-8">
+                        <div class="flex items-start">
+                            <div class="bg-primary/20 p-3 rounded-lg mr-4">
+                                <i class="fa-solid fa-rocket text-primary text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-bold mb-2">Zero-Friction Deployment</h4>
+                                <p class="text-slate-400">Forget the command line. Your personal Nightscout site is live in a few simple clicks.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-primary/20 p-3 rounded-lg mr-4">
+                                <i class="fa-solid fa-shield-heart text-primary text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-bold mb-2">Always-On Reliability</h4>
+                                <p class="text-slate-400">We provide 24/7 monitoring. While you sleep, our systems are awake.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-primary/20 p-3 rounded-lg mr-4">
+                                <i class="fa-solid fa-screwdriver-wrench text-primary text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-bold mb-2">Hands-Free Maintenance</h4>
+                                <p class="text-slate-400">We handle the updates, security patches, and database optimizations behind the scenes.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-primary/20 p-3 rounded-lg mr-4">
+                                <i class="fa-solid fa-headset text-primary text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-bold mb-2">Expert Support</h4>
+                                <p class="text-slate-400">You aren't just getting a server; you're getting a partner who understands the Nightscout ecosystem.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- CTA / Footer -->
+    <section id="get-started" class="py-20 bg-primary text-white text-center">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl md:text-5xl font-bold mb-6">Your Data. Your Control. Our Expertise.</h2>
+            <p class="text-xl text-blue-100 mb-8">
+                NextCGM was founded on the idea that technology should simplify life, not complicate it. By combining the power of open-source freedom with the reliability of professional hosting, we give you the best of both worlds.
+            </p>
+            <p class="text-2xl font-semibold mb-10">Stop managing code. Start managing health.</p>
+            <a href="mailto:nextcgmsa@outlook.com" class="inline-block bg-white text-primary hover:bg-slate-100 px-10 py-5 rounded-full text-xl font-bold transition-all shadow-xl hover:shadow-2xl transform hover:-translate-y-1">
+                Contact Us to Launch Today
+            </a>
+        </div>
+    </section>
+
+    <footer class="bg-dark text-slate-400 py-8 text-center">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col items-center justify-center gap-4">
+            <a href="mailto:nextcgmsa@outlook.com" class="hover:text-white transition-colors flex items-center gap-2">
+                <i class="fa-regular fa-envelope"></i> nextcgmsa@outlook.com
+            </a>
+            <p>&copy; 2026 NextCGM. All rights reserved.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
