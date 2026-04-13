@@ -36,8 +36,12 @@ namespace NextCgm.DataEntities.User
 
         public Guid ProvinceStateListID { get; set; }
 
+        public string ApiKeyForNightScout { get; set; } = string.Empty;
+
         public Guid TimeZoneID { get; set; }
-       
+
+        public ICollection<Containers.DockerContainers> DockerContainers { get; set; } = new List<Containers.DockerContainers>();
+
 
 
 
