@@ -1,5 +1,5 @@
 ﻿using NextCgm.DataEntities.Locations;
-using NextCgm.Helpers;
+using NextCgm.Helpers.Utils;
 
 namespace NextCgm.Shared.ApiViewModels
 {

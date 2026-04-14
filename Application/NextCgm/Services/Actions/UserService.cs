@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NextCgm.DataEntities.User;
 using NextCgm.DContentext;
-using NextCgm.Helpers;
 using NextCgm.Helpers.SubDomainGenerator;
+using NextCgm.Helpers.Utils;
 using NextCgm.Shared.ApiViewModels;
 using NextCgm.Shared.DTOS;
 using System.Security.Cryptography.X509Certificates;

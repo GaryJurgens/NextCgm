@@ -1,4 +1,4 @@
-﻿namespace NextCgm.Helpers
+﻿namespace NextCgm.Helpers.Utils
 {
    
         public enum DockerContainerStatus
