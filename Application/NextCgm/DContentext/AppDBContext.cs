@@ -18,6 +18,17 @@ namespace NextCgm.DContentext
 
         public DbSet<TimeZones> TimeZones { get; set; }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<UserEntity>()
+                .HasIndex(u => u.UserSubDomain)
+                .IsUnique();
+
+            modelBuilder.Entity<UserEntity>()
+                .HasIndex(u => u.ApiKeyForNightScout)
+                .IsUnique();
+        }
+
 
 
     }

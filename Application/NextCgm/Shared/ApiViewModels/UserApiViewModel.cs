@@ -1,18 +1,16 @@
-﻿using NextCgm.DataEntities.Containers;
-using NextCgm.DataEntities.Locations;
+﻿using NextCgm.DataEntities.Locations;
 using NextCgm.Helpers;
 
-namespace NextCgm.DataEntities.User
+namespace NextCgm.Shared.ApiViewModels
 {
-    public class UserEntity
+    public class UserApiViewModel
     {
 
-        public Guid UserEntityID { get; set; }   = Medo.Uuid7.NewUuid7();
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
         public string EmailUsername { get; set; } = string.Empty;
         public string PasswordHash { get; set; } = string.Empty;
-        
+
         public bool Active { get; set; }
 
         public DateTime LastLogin { get; set; }
@@ -30,7 +28,7 @@ namespace NextCgm.DataEntities.User
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime LastUpdatedAt { get; set; } = DateTime.UtcNow;
 
-        public Guid CountryListID { get; set; } 
+        public Guid CountryListID { get; set; }
         public CountryList? Country { get; set; }
 
         public string CountryName { get; set; } = string.Empty;
@@ -46,15 +44,8 @@ namespace NextCgm.DataEntities.User
 
         public Guid TimeZoneID { get; set; }
 
-        public ICollection<Containers.DockerContainers> DockerContainers { get; set; } = new List<Containers.DockerContainers>();
+        public ICollection<DockerContainerStatus> DockerContainers { get; set; } = new List<DockerContainerStatus>();
 
-        public string DockerStatus { get; set; } = string.Empty;
-
-        public string DockerName { get; set; } = string.Empty;
-
-
-
-
-
+        public string DockerStatus { get; set; }
     }
 }

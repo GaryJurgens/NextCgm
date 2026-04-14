@@ -33,9 +33,7 @@
 
   <ItemGroup>
     <Folder Include="DataEntities\Billing\" />
-    <Folder Include="Shared\ApiModels\" />
     <Folder Include="Endpoints\" />
-    <Folder Include="Shared\DTOS\" />
   </ItemGroup>
 
 </Project>

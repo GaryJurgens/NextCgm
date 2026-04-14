@@ -1,7 +1,6 @@
 ﻿namespace NextCgm.Helpers
 {
-    public class DockerStatusEnums
-    {
+   
         public enum DockerContainerStatus
         {
             Created,
@@ -10,7 +9,8 @@
             Restarting,
             Removing,
             Exited,
-            Dead
+            Dead,
+            Pending,
         }
     }
-}
+

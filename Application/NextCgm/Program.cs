@@ -1,6 +1,36 @@
+using NextCgm.Helpers.SubDomainGenerator;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+
+// the following is for the SubDomainGenrator
+// 1. Pull the paths from appsettings.json
+// --- SubDomainGenerator Initialization ---
+
+// 1. Pull the paths from appsettings.json
+var adjPath = builder.Configuration["NamingSystem:AdjectivesPath"] ?? "Helpers/SubDomainGenerator/adjectives.txt";
+var colPath = builder.Configuration["NamingSystem:ColorsPath"] ?? "Helpers/SubDomainGenerator/colors.txt";
+var natoPath = builder.Configuration["NamingSystem:NatoPath"] ?? "Helpers/SubDomainGenerator/nato.txt";
+bool UseAdjColorNatoSuperSlug = builder.Configuration.GetValue<bool>("NamingSystem:UseSuperSlug");
+
+// 2. Resolve the absolute paths
+string root = AppContext.BaseDirectory;
+
+// 3. Initialize the Static Generator once
+NameGenerator.Initialize(
+    Path.Combine(root, adjPath),
+    Path.Combine(root, colPath),
+    Path.Combine(root, natoPath)
+);
+
+
+
+// Inside Program.cs after Initialize
+Console.WriteLine($"Naming System Initialized with {NameGenerator.AdjectiveCount} adjectives.");
+
+// end of SubDomainGenerator
 
 var app = builder.Build();
 
@@ -8,27 +38,16 @@ var app = builder.Build();
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-});
+
 
 app.Run();
 
-internal record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
+// At App Startup (e.g., Program.cs or Startup.cs)
+NameGenerator.Initialize("adj.txt", "colors.txt", "nato.txt");
+
+// When you need a name
+string newSubdomain = NameGenerator.GetAdjNatio();
+      
+string GetAdjColorNato = NameGenerator.GetAdjColorNato(UseAdjColorNatoSuperSlug = false);
+
