@@ -1,0 +1,47 @@
+using FastEndpoints;
+using NextCgm.Services.Actions;
+using NextCgm.Shared.DTOS;
+
+namespace NextCgm.Endpoints
+{
+    public class CreateContainerEndpoint : Endpoint<CreateContainerRequestDTO, CreateContainerResponseDTO>
+    {
+        private readonly IDockerContainerService _dockerContainerService;
+
+        public CreateContainerEndpoint(IDockerContainerService dockerContainerService)
+        {
+            _dockerContainerService = dockerContainerService;
+        }
+
+        public override void Configure()
+        {
+            Post("/api/Containers/CreateContainer");
+            // Require authentication
+            Summary(s =>
+            {
+                s.Summary = "Create a new container";
+                s.Description = "Creates a new Docker container for the user.";
+            });
+        }
+
+        public override async Task HandleAsync(CreateContainerRequestDTO req, CancellationToken ct)
+        {
+            try
+            {
+                var response = await _dockerContainerService.CreateDockerContainer();
+                if (response.Success)
+                {
+                    await Send.OkAsync(response,  ct);
+                }
+                else
+                {
+                    await Send.StatusCodeAsync(400,  ct);
+                }
+            }
+            catch (Exception ex)
+            {
+                ThrowError(ex.Message, 400);
+            }
+        }
+    }
+}

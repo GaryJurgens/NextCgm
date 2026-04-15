@@ -19,7 +19,7 @@ namespace NextCgm.Endpoints
         public override void Configure()
         {
             Post("/api/Users/CreateUser");
-            Policies("AdminOnly");
+           
             Summary(s =>
             {
                 s.Summary = "Create a new user";

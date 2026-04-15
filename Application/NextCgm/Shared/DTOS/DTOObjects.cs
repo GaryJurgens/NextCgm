@@ -6,6 +6,50 @@ namespace NextCgm.Shared.DTOS
     {
     }
 
+    public class LoginRequestDTO
+    {
+        public string EmailUsername { get; set; }
+        public string Password { get; set; }
+    }
+
+    public class LoginResponseDTO
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; }
+        public string Token { get; set; }
+        public UserApiViewModel? Payload { get; set; }
+
+        public static LoginResponseDTO Failure(string msg)
+        {
+            return new LoginResponseDTO
+            {
+                Success = false,
+                Message = msg,
+                Token = string.Empty,
+                Payload = null
+            };
+        }
+    }
+
+    public class RemoveUserRequestDTO
+    {
+        public Guid UserId { get; set; }
+    }
+
+    public class RemoveUserResponseDTO
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; }
+
+        public static RemoveUserResponseDTO Failure(string msg)
+        {
+            return new RemoveUserResponseDTO
+            {
+                Success = false,
+                Message = msg
+            };
+        }
+    }
 
     public class CreateUserResponseDTO
     {

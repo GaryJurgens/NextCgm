@@ -1,4 +1,5 @@
-﻿using NextCgm.DataEntities.User;
+﻿using Microsoft.EntityFrameworkCore;
+using NextCgm.DataEntities.User;
 using NextCgm.DContentext;
 using NextCgm.Helpers.SubDomainGenerator;
 using NextCgm.Helpers.Utils;
@@ -10,17 +11,72 @@ namespace NextCgm.Services.Actions
     public interface IUserService
     {
         Task<GetUserResponseDTO> CreateUserAsync(CreateUserRequestDTO request);
+        Task<LoginResponseDTO> LoginAsync(LoginRequestDTO request);
+        Task<RemoveUserResponseDTO> RemoveUserAsync(RemoveUserRequestDTO request);
     }
 
     public class UserService : IUserService
     {
         // 1. Fields go here (At the top of the CLASS)
         private readonly AppDBContext _context;
+        private readonly IJwtTokenGenerator _jwtTokenGenerator;
 
         // 2. Constructor goes here (Also at the top of the CLASS)
-        public UserService(AppDBContext context)
+        public UserService(AppDBContext context, IJwtTokenGenerator jwtTokenGenerator)
         {
             _context = context;
+            _jwtTokenGenerator = jwtTokenGenerator;
+        }
+
+        public async Task<LoginResponseDTO> LoginAsync(LoginRequestDTO request)
+        {
+            var user = await _context.UserEntities.FirstOrDefaultAsync(u => u.EmailUsername == request.EmailUsername);
+            if (user == null)
+            {
+                return LoginResponseDTO.Failure("Invalid credentials");
+            }
+
+            if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+            {
+                return LoginResponseDTO.Failure("Invalid credentials");
+            }
+
+            var token = _jwtTokenGenerator.GenerateToken(user);
+
+            var viewModel = new UserApiViewModel
+            {
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                UserSubDomain = $"{user.UserSubDomain}.nextcgm.com",
+                ApiKeyForNightScout = user.ApiKeyForNightScout,
+                DockerStatus = user.DockerStatus.ToString()
+            };
+
+            return new LoginResponseDTO
+            {
+                Success = true,
+                Message = "Login successful",
+                Token = token,
+                Payload = viewModel
+            };
+        }
+
+        public async Task<RemoveUserResponseDTO> RemoveUserAsync(RemoveUserRequestDTO request)
+        {
+            var user = await _context.UserEntities.FirstOrDefaultAsync(u => u.UserEntityID == request.UserId);
+            if (user == null)
+            {
+                return RemoveUserResponseDTO.Failure("User not found");
+            }
+
+            _context.UserEntities.Remove(user);
+            await _context.SaveChangesAsync();
+
+            return new RemoveUserResponseDTO
+            {
+                Success = true,
+                Message = "User removed successfully"
+            };
         }
 
         // 3. The Method goes here
