@@ -1,15 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
-using NextCgm.DataEntities.User;
+﻿using NextCgm.DataEntities.User;
 using NextCgm.DContentext;
 using NextCgm.Helpers.SubDomainGenerator;
 using NextCgm.Helpers.Utils;
 using NextCgm.Shared.ApiViewModels;
 using NextCgm.Shared.DTOS;
-using System.Security.Cryptography.X509Certificates;
 
 namespace NextCgm.Services.Actions
 {
-
     public class UserService
     {
         // 1. Fields go here (At the top of the CLASS)
@@ -45,7 +42,7 @@ namespace NextCgm.Services.Actions
                 CountryListID = request.Payload.CountryListID,
                 ProvinceStateListID = request.Payload.ProvinceStateListID,
                 DockerStatus = DockerContainerStatus.Pending.ToString()
-            }; 
+            };
 
             try
             {
@@ -56,7 +53,6 @@ namespace NextCgm.Services.Actions
                 // D. Map to your ViewModel
                 var viewModel = new UserApiViewModel
                 {
-                   
                     FirstName = newUser.FirstName,
                     LastName = newUser.LastName,
                     UserSubDomain = $"{newUser.UserSubDomain}.nextcgm.com",
@@ -82,5 +78,4 @@ namespace NextCgm.Services.Actions
             }
         }
     }
-
 }

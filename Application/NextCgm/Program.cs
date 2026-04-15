@@ -5,7 +5,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-
 // the following is for the SubDomainGenrator
 // 1. Pull the paths from appsettings.json
 // --- SubDomainGenerator Initialization ---
@@ -26,8 +25,6 @@ NameGenerator.Initialize(
     Path.Combine(root, natoPath)
 );
 
-
-
 // Inside Program.cs after Initialize
 Console.WriteLine($"Naming System Initialized with {NameGenerator.AdjectiveCount} adjectives.");
 
@@ -37,7 +34,6 @@ Console.WriteLine($"Naming System Initialized with {NameGenerator.AdjectiveCount
 builder.Services.Configure<DockerOptions>(
     builder.Configuration.GetSection("DockerSettings")); // gets the docker image name and tag from appsettings.json
 
-
 // end Register services
 
 var app = builder.Build();
@@ -46,9 +42,6 @@ var app = builder.Build();
 
 app.UseHttpsRedirection();
 
-
-
-
 app.Run();
 
 // At App Startup (e.g., Program.cs or Startup.cs)
@@ -56,6 +49,5 @@ NameGenerator.Initialize("adj.txt", "colors.txt", "nato.txt");
 
 // When you need a name
 string newSubdomain = NameGenerator.GetAdjNatio();
-      
-string GetAdjColorNato = NameGenerator.GetAdjColorNato(UseAdjColorNatoSuperSlug = false);
 
+string GetAdjColorNato = NameGenerator.GetAdjColorNato(UseAdjColorNatoSuperSlug = false);

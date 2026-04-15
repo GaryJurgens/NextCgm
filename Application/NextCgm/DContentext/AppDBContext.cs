@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using NextCgm.DataEntities;
 using NextCgm.DataEntities.Containers;
 using NextCgm.DataEntities.Locations;
 using NextCgm.DataEntities.User;
@@ -9,7 +10,6 @@ namespace NextCgm.DContentext
     {
         public AppDBContext(DbContextOptions<AppDBContext> options) : base(options)
         {
-
         }
 
         public DbSet<UserEntity> UserEntities { get; set; }
@@ -21,6 +21,8 @@ namespace NextCgm.DContentext
 
         public DbSet<DockerContainers> DockerContainers { get; set; }
 
+        public DbSet<DockerLogger> DockerLogger { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<UserEntity>()
@@ -31,8 +33,5 @@ namespace NextCgm.DContentext
                 .HasIndex(u => u.ApiKeyForNightScout)
                 .IsUnique();
         }
-
-
-
     }
 }

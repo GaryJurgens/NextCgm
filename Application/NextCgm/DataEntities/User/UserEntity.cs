@@ -1,18 +1,15 @@
-﻿using NextCgm.DataEntities.Containers;
-using NextCgm.DataEntities.Locations;
-using NextCgm.Helpers;
+﻿using NextCgm.DataEntities.Locations;
 
 namespace NextCgm.DataEntities.User
 {
     public class UserEntity
     {
-
-        public Guid UserEntityID { get; set; }   = Medo.Uuid7.NewUuid7();
+        public Guid UserEntityID { get; set; } = Medo.Uuid7.NewUuid7();
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
         public string EmailUsername { get; set; } = string.Empty;
         public string PasswordHash { get; set; } = string.Empty;
-        
+
         public bool Active { get; set; }
 
         public DateTime LastLogin { get; set; }
@@ -24,13 +21,12 @@ namespace NextCgm.DataEntities.User
 
         public DateTime VerificationCodeExpiry { get; set; }
 
-
         public string MobileNumber { get; set; } = string.Empty;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime LastUpdatedAt { get; set; } = DateTime.UtcNow;
 
-        public Guid CountryListID { get; set; } 
+        public Guid CountryListID { get; set; }
         public CountryList? Country { get; set; }
 
         public string CountryName { get; set; } = string.Empty;
@@ -42,7 +38,7 @@ namespace NextCgm.DataEntities.User
 
         public string UserSubDomain { get; set; } = string.Empty; // like dolfie.nextcgm.com, where Dolfie is the user subdomain, and nextcgm.com is the main domain. This is used for mapping to the host machine and for creating a unique URL for the user to access their container.
 
-        // both the apikey and UserSubDomain generate a url like this https://oros450.dolfie.nextgcm.com/api/v1/ 
+        // both the apikey and UserSubDomain generate a url like this https://oros450.dolfie.nextgcm.com/api/v1/
 
         public Guid TimeZoneID { get; set; }
 
@@ -51,10 +47,5 @@ namespace NextCgm.DataEntities.User
         public string DockerStatus { get; set; } = string.Empty;
 
         public string DockerName { get; set; } = string.Empty;
-
-
-
-
-
     }
 }

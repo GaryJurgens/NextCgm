@@ -1,15 +1,14 @@
 ﻿using MimeKit;
-using MailKit.Net.Smtp; // <-- Use MailKit's SmtpClient, not System.Net.Mail
-
 
 namespace NextCgm.Helpers.Utils
 {
-
     public interface IEmailService
     {
         Task<bool> SendEmailAsync(string to, string subject, string body, string? toName = null);
+
         Task<bool> SendVerificationCodeAsync(string email, string name, string verificationCode);
     }
+
     public class EmailService : IEmailService
     {
         private readonly IConfiguration _configuration;
@@ -113,5 +112,4 @@ namespace NextCgm.Helpers.Utils
             }
         }
     }
-
 }

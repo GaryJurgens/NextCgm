@@ -6,7 +6,6 @@ using System.Text;
 
 namespace NextCgm.Helpers.Utils
 {
-
     public interface IJwtTokenGenerator
     {
         string GenerateToken(UserEntity user);
@@ -30,8 +29,6 @@ namespace NextCgm.Helpers.Utils
             new Claim(ClaimTypes.NameIdentifier, user.UserEntityID.ToString()),
             new Claim(ClaimTypes.Name, user.EmailUsername),
             new Claim("UserID", user.UserEntityID.ToString()),
-
-
         };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Key"] ?? "882f7336-18a3-49a0-a008-a8a8ee515106"));
@@ -48,6 +45,5 @@ namespace NextCgm.Helpers.Utils
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
-
     }
 }

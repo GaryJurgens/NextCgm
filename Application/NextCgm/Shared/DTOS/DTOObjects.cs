@@ -4,8 +4,6 @@ namespace NextCgm.Shared.DTOS
 {
     public class DTOObjects
     {
-        
-
     }
 
     public class GetUserResponseDTO
@@ -49,6 +47,7 @@ namespace NextCgm.Shared.DTOS
         public bool Success { get; set; }
         public string Message { get; set; }
         public ContainerApiViewModel? Payload { get; set; }
+
         // Static helper for quick errors
         public static CreateContainerResponseDTO Failure(string msg)
         {
@@ -66,6 +65,7 @@ namespace NextCgm.Shared.DTOS
         public bool Success { get; set; }
         public string Message { get; set; }
         public ContainerApiViewModel? Payload { get; set; }
+
         // Static helper for quick errors
         public static GetContainerRequestDTO Failure(string msg)
         {
@@ -83,6 +83,7 @@ namespace NextCgm.Shared.DTOS
         public bool Success { get; set; }
         public string Message { get; set; }
         public List<ContainerApiViewModel>? Payload { get; set; }
+
         // Static helper for quick errors
         public static GetAllContainersResponseDTO Failure(string msg)
         {
@@ -100,6 +101,7 @@ namespace NextCgm.Shared.DTOS
         public bool Success { get; set; }
         public string Message { get; set; }
         public List<ContainerApiViewModel>? Payload { get; set; }
+
         // Static helper for quick errors
         public static GetAllContainersRequestDTO Failure(string msg)
         {
@@ -117,6 +119,7 @@ namespace NextCgm.Shared.DTOS
         public bool Success { get; set; }
         public string Message { get; set; }
         public ContainerApiViewModel? Payload { get; set; }
+
         // Static helper for quick errors
         public static CreateContainerRequestDTO Failure(string msg)
         {
@@ -137,6 +140,7 @@ namespace NextCgm.Shared.DTOS
         public int CurrentPage { get; set; } = 1; // for pagination, default to page 1
         public int PageSize { get; set; } = 10; // for pagination, default to 10 items per page
         public List<ContainerApiViewModel>? Payload { get; set; }
+
         // Static helper for quick errors
         public static GetAllContinaersByUserRequestDTO Failure(string msg)
         {
@@ -148,6 +152,4 @@ namespace NextCgm.Shared.DTOS
             };
         }
     }
-
-
 }

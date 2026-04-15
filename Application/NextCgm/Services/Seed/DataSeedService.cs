@@ -7,14 +7,15 @@ namespace NextCgm.Services.Seed
     public interface IDataSeedService
     {
         Task<bool> IsDataSeededAsync();
+
         Task SeedCountriesAndStatesAsync();
     }
 
     public class DataSeedService : IDataSeedService
     {
-
         private readonly DContentext.AppDBContext _context;
         private readonly ILogger<DataSeedService> _logger;
+
         public DataSeedService(DContentext.AppDBContext context, ILogger<DataSeedService> logger)
         {
             _context = context;
@@ -147,10 +148,8 @@ namespace NextCgm.Services.Seed
                 throw;
             }
         }
-
-
-
     }
+
     // JSON mapping classes
     public class CountryData
     {
@@ -259,7 +258,4 @@ namespace NextCgm.Services.Seed
         [JsonProperty("type")]
         public string? Type { get; set; }
     }
-
 }
-
-

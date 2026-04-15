@@ -1,10 +1,7 @@
-﻿using BCrypt.Net;
-
-namespace NextCgm.Helpers.Utils
+﻿namespace NextCgm.Helpers.Utils
 {
     public static class PasswordHasher
     {
-
         public static string HashPassword(string password)
         {
             return BCrypt.Net.BCrypt.HashPassword(password);
@@ -14,6 +11,5 @@ namespace NextCgm.Helpers.Utils
         {
             return BCrypt.Net.BCrypt.Verify(password, hash);
         }
-
     }
 }

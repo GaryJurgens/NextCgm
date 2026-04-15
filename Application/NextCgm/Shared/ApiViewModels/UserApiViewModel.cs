@@ -5,7 +5,6 @@ namespace NextCgm.Shared.ApiViewModels
 {
     public class UserApiViewModel
     {
-
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
         public string EmailUsername { get; set; } = string.Empty;
@@ -21,7 +20,6 @@ namespace NextCgm.Shared.ApiViewModels
         public DateTime VerificationCodeSentTime { get; set; }
 
         public DateTime VerificationCodeExpiry { get; set; }
-
 
         public string MobileNumber { get; set; } = string.Empty;
 
@@ -40,7 +38,7 @@ namespace NextCgm.Shared.ApiViewModels
 
         public string UserSubDomain { get; set; } = string.Empty; // like dolfie.nextcgm.com, where Dolfie is the user subdomain, and nextcgm.com is the main domain. This is used for mapping to the host machine and for creating a unique URL for the user to access their container.
 
-        // both the apikey and UserSubDomain generate a url like this https://oros450.dolfie.nextgcm.com/api/v1/ 
+        // both the apikey and UserSubDomain generate a url like this https://oros450.dolfie.nextgcm.com/api/v1/
 
         public Guid TimeZoneID { get; set; }
 

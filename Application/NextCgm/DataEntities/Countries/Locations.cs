@@ -3,12 +3,9 @@ using Newtonsoft.Json;
 using NextCgm.DataEntities.User;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.Metrics;
 
 namespace NextCgm.DataEntities.Locations
 {
-
-
     /// <summary>
     /// A lookup table containing comprehensive country details (ISO codes, currency, etc.).
     /// Acts as the parent entity for ProvinceStateList and TimeZones to provide a geographical hierarchy.
@@ -83,8 +80,6 @@ namespace NextCgm.DataEntities.Locations
         public ICollection<UserEntity> Users { get; set; } = new List<UserEntity>();
     }
 
-
-
     /// <summary>
     /// Represents states or provinces within a country.
     /// Links to CountryList to establish the geographical parent-child relationship.
@@ -155,7 +150,4 @@ namespace NextCgm.DataEntities.Locations
 
         public ICollection<UserEntity> Users { get; } = new List<UserEntity>();
     }
-
-
-
 }
