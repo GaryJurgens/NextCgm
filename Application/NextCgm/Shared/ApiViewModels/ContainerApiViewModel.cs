@@ -33,6 +33,8 @@ namespace NextCgm.Shared.ApiViewModels
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime StoppedAt { get; set; }
         public DateTime RemovedAt { get; set; }
-
+        public string ImageNameInUse { get; internal set; }
+        public int ExposedPortLeft { get; internal set; }
+        public int HostPortRight { get; internal set; }
     }
 }

@@ -11,6 +11,7 @@
             Exited,
             Dead,
             Pending,
-        }
+        Error,
+    }
     }
 

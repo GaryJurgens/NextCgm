@@ -1,4 +1,5 @@
 using NextCgm.Helpers.SubDomainGenerator;
+using NextCgm.Helpers.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +32,13 @@ NameGenerator.Initialize(
 Console.WriteLine($"Naming System Initialized with {NameGenerator.AdjectiveCount} adjectives.");
 
 // end of SubDomainGenerator
+
+// register services
+builder.Services.Configure<DockerOptions>(
+    builder.Configuration.GetSection("DockerSettings")); // gets the docker image name and tag from appsettings.json
+
+
+// end Register services
 
 var app = builder.Build();
 

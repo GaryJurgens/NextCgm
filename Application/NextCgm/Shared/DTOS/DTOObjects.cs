@@ -44,15 +44,15 @@ namespace NextCgm.Shared.DTOS
         }
     }
 
-    public class GetContainerResponseDTO // this is the response DTO for the GetContainer API endpoint, which is used to get the container information for a user. This
+    public class CreateContainerResponseDTO // this is the response DTO for the GetContainer API endpoint, which is used to get the container information for a user. This
     {
         public bool Success { get; set; }
         public string Message { get; set; }
         public ContainerApiViewModel? Payload { get; set; }
         // Static helper for quick errors
-        public static GetContainerResponseDTO Failure(string msg)
+        public static CreateContainerResponseDTO Failure(string msg)
         {
-            return new GetContainerResponseDTO
+            return new CreateContainerResponseDTO
             {
                 Success = false,
                 Message = msg,

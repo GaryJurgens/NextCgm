@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using NextCgm.DataEntities.Containers;
 using NextCgm.DataEntities.Locations;
 using NextCgm.DataEntities.User;
 
@@ -17,6 +18,8 @@ namespace NextCgm.DContentext
         public DbSet<ProvinceStateList> ProvinceStateLists { get; set; }
 
         public DbSet<TimeZones> TimeZones { get; set; }
+
+        public DbSet<DockerContainers> DockerContainers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
