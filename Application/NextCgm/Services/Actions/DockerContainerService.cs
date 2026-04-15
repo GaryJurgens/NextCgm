@@ -85,7 +85,8 @@ namespace NextCgm.Services.Actions
                 {
                     ContaierID = Uuid7.NewUuid7(),
                     InstanceID = containerId,
-                    FriendlyContainerURL = SubDomainGen + _options.EndDomain,
+                    AppUniqueName = SubDomainGen,
+                    DockerLable = "Owner=" + SubDomainGen,
                     ImageNameInUse = _options.ImageName,
                     ExposedPortLeft = ExposedPort,
                     HostPortRight = _options.ContainerPort,
@@ -174,7 +175,7 @@ namespace NextCgm.Services.Actions
                     {
                         ContaierID = Uuid7.NewUuid7(),
                         InstanceID = containerId,
-                        FriendlyContainerURL = SubDomainGen + _options.EndDomain,
+                        AppUniqueName = SubDomainGen,
                         ImageNameInUse = _options.ImageName,
                         ExposedPortLeft = ExposedPort,
                         HostPortRight = _options.ContainerPort,

@@ -8,5 +8,14 @@
         public int ContainerPort { get; set; } = 80;
 
         public string EndDomain { get; set; } = string.Empty;
+
+        
+    }
+
+    public class NginxUnitOptions
+    {
+        public string ApiBaseUrl { get; set; }
+        public string DefaultAppRoot { get; set; }
+        // This comes from AppConfig
     }
 }
