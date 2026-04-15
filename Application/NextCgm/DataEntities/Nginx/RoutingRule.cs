@@ -3,9 +3,9 @@ using NextCgm.DataEntities.Containers;
 
 namespace NextCgm.DataEntities.Nginx
 {
-    public class RoutingRule
+    public class NginxRoutingRule
     {
-        public Guid RoutingRuleID { get; set; } = Uuid7.NewGuid();
+        public Guid NginxRoutingRuleID { get; set; } = Uuid7.NewGuid();
         public Guid DockerContainerID { get; set; }
         public virtual DockerContainers Container { get; set; }
 

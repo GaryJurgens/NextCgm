@@ -2,6 +2,7 @@
 using NextCgm.DataEntities;
 using NextCgm.DataEntities.Containers;
 using NextCgm.DataEntities.Locations;
+using NextCgm.DataEntities.Nginx;
 using NextCgm.DataEntities.User;
 
 namespace NextCgm.DContentext
@@ -22,6 +23,12 @@ namespace NextCgm.DContentext
         public DbSet<DockerContainers> DockerContainers { get; set; }
 
         public DbSet<DockerLogger> DockerLogger { get; set; }
+
+        public DbSet<NginxContainer> NginxContainers { get; set; }
+
+        public DbSet<NginxSyncLog> NginxSyncLogs { get; set; }
+
+        public DbSet<NginxRoutingRule> NginxRoutingRules { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
