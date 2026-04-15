@@ -6,6 +6,42 @@ namespace NextCgm.Shared.DTOS
     {
     }
 
+
+    public class CreateUserResponseDTO
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; }
+        public UserApiViewModel? Payload { get; set; }
+        // Static helper for quick errors
+        public static CreateUserResponseDTO Failure(string msg)
+        {
+            return new CreateUserResponseDTO
+            {
+                Success = false,
+                Message = msg,
+                Payload = null
+            };
+        }
+    }
+
+    public class  CreateUserRequestDTO
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; }
+        public UserApiViewModel? Payload { get; set; }
+        // Static helper for quick errors
+        public static CreateUserResponseDTO Failure(string msg)
+        {
+            return new CreateUserResponseDTO
+            {
+                Success = false,
+                Message = msg,
+                Payload = null
+            };
+        }
+
+    }
+
     public class GetUserResponseDTO
     {
         public bool Success { get; set; }
@@ -24,23 +60,7 @@ namespace NextCgm.Shared.DTOS
         }
     }
 
-    public class GetUserRequestDTO
-    {
-        public bool Success { get; set; }
-        public string Message { get; set; }
-        public UserApiViewModel? Payload { get; set; }
-
-        // Static helper for quick errors
-        public static GetUserResponseDTO Failure(string msg)
-        {
-            return new GetUserResponseDTO
-            {
-                Success = false,
-                Message = msg,
-                Payload = null
-            };
-        }
-    }
+  
 
     public class CreateContainerResponseDTO // this is the response DTO for the GetContainer API endpoint, which is used to get the container information for a user. This
     {

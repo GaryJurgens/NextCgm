@@ -9,7 +9,7 @@ namespace NextCgm.Services.Actions
 {
     public interface IUserService
     {
-        Task<GetUserResponseDTO> CreateUserAsync(GetUserRequestDTO request);
+        Task<GetUserResponseDTO> CreateUserAsync(CreateUserRequestDTO request);
     }
 
     public class UserService : IUserService
@@ -24,7 +24,7 @@ namespace NextCgm.Services.Actions
         }
 
         // 3. The Method goes here
-        public async Task<GetUserResponseDTO> CreateUserAsync(GetUserRequestDTO request)
+        public async Task<GetUserResponseDTO> CreateUserAsync(CreateUserRequestDTO request)
         {
             // A. Generate identifiers
             string generatedSubDomain = NameGenerator.GetAdjNatio();
