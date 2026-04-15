@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NextCgm.DataEntities;
 using NextCgm.DataEntities.Containers;
+using NextCgm.DataEntities.DocumentDatabases;
 using NextCgm.DataEntities.Locations;
 using NextCgm.DataEntities.Nginx;
 using NextCgm.DataEntities.User;
@@ -29,6 +30,8 @@ namespace NextCgm.DContentext
         public DbSet<NginxSyncLog> NginxSyncLogs { get; set; }
 
         public DbSet<NginxRoutingRule> NginxRoutingRules { get; set; }
+
+        public DbSet<UserContainerDatabase> UserContainerDatabases { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

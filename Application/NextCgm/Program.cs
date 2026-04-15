@@ -42,8 +42,12 @@ builder.Services.Configure<DockerOptions>(
 builder.Services.Configure<NginxUnitOptions>(
     builder.Configuration.GetSection("NginxUnitOptions"));
 
+builder.Services.Configure<DocumentDbOptions>(
+    builder.Configuration.GetSection("DocumentDbSettings"));
+
 builder.Services.AddScoped<INginxService,NginxService>();
 builder.Services.AddScoped<IDockerContainerService,DockerContainerService>();
+builder.Services.AddScoped<IDocumentDbService,DocumentDbService>();
 builder.Services.AddScoped<IUserService,UserService>();
 
 builder.Services.AddScoped<IDataSeedService, DataSeedService>();

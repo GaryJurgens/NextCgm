@@ -24,12 +24,14 @@ namespace NextCgm.Services.Actions
         private readonly string SubDomainGen = Helpers.SubDomainGenerator.NameGenerator.GetAdjNatio();
         private readonly DockerOptions _options;
         private readonly INginxService _nginxService;
+        private readonly IDocumentDbService _documentDbService;
 
-        public DockerContainerService(AppDBContext context, IOptions<DockerOptions> options, INginxService nginxService)
+        public DockerContainerService(AppDBContext context, IOptions<DockerOptions> options, INginxService nginxService, IDocumentDbService documentDbService)
         {
             _context = context;
             _options = options.Value;
             _nginxService = nginxService;
+            _documentDbService = documentDbService;
         }
 
         public async Task<CreateContainerResponseDTO> CreateDockerContainer()
@@ -228,6 +230,18 @@ namespace NextCgm.Services.Actions
                         }
                     };
                     await _nginxService.CreateNginxMappingAsync(nginxRequest);
+
+                    // Create Document DB Database
+                    var dbRequest = new CreateDocumentDbRequestDTO
+                    {
+                        Success = true,
+                        Message = "Requesting Document DB Creation",
+                        Payload = new Shared.ApiViewModels.DocumentDbApiViewModel
+                        {
+                            DatabaseName = SubDomainGen
+                        }
+                    };
+                    await _documentDbService.CreateDatabaseAsync(dbRequest);
 
                     return new CreateContainerResponseDTO
                     {

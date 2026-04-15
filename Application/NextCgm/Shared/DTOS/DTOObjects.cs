@@ -186,4 +186,38 @@ namespace NextCgm.Shared.DTOS
             };
         }
     }
+
+    public class CreateDocumentDbRequestDTO
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; }
+        public DocumentDbApiViewModel? Payload { get; set; }
+
+        public static CreateDocumentDbRequestDTO Failure(string msg)
+        {
+            return new CreateDocumentDbRequestDTO
+            {
+                Success = false,
+                Message = msg,
+                Payload = null
+            };
+        }
+    }
+
+    public class CreateDocumentDbResponseDTO
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; }
+        public DocumentDbApiViewModel? Payload { get; set; }
+
+        public static CreateDocumentDbResponseDTO Failure(string msg)
+        {
+            return new CreateDocumentDbResponseDTO
+            {
+                Success = false,
+                Message = msg,
+                Payload = null
+            };
+        }
+    }
 }
