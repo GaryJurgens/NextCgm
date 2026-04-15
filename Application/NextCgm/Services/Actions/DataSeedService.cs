@@ -1,22 +1,24 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using NextCgm.DataEntities.Locations;
+using NextCgm.DContentext;
+using NextCgm.Services.Seed;
+using System.Diagnostics.Metrics;
 
-namespace NextCgm.Services.Seed
+namespace NextCgm.Services.Actions
 {
     public interface IDataSeedService
     {
         Task<bool> IsDataSeededAsync();
-
         Task SeedCountriesAndStatesAsync();
     }
 
     public class DataSeedService : IDataSeedService
     {
-        private readonly DContentext.AppDBContext _context;
+
+        private readonly AppDBContext _context;
         private readonly ILogger<DataSeedService> _logger;
 
-        public DataSeedService(DContentext.AppDBContext context, ILogger<DataSeedService> logger)
+        public DataSeedService(AppDBContext context, ILogger<DataSeedService> logger)
         {
             _context = context;
             _logger = logger;
@@ -24,7 +26,7 @@ namespace NextCgm.Services.Seed
 
         public async Task<bool> IsDataSeededAsync()
         {
-            return await _context.CountryLists.AnyAsync();
+            return _context.CountryLists.Any();
         }
 
         public async Task SeedCountriesAndStatesAsync()
@@ -39,7 +41,12 @@ namespace NextCgm.Services.Seed
 
                 _logger.LogInformation("Starting database seeding...");
 
-                var jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DBSeed/SeedData", "countries+states.json");
+                var jsonPath = Path.Combine(
+                    AppDomain.CurrentDomain.BaseDirectory,
+                    "Helpers",
+                    "SeedData",
+                    "countries+states.json"
+                );
 
                 if (!File.Exists(jsonPath))
                 {
@@ -105,7 +112,11 @@ namespace NextCgm.Services.Seed
                                 Abbreviation = tzData.Abbreviation,
                                 TzName = tzData.TzName,
                                 CountryListID = countryId
+
                             };
+
+
+
 
                             timezones.Add(timezone);
                         }
@@ -148,114 +159,9 @@ namespace NextCgm.Services.Seed
                 throw;
             }
         }
-    }
 
-    // JSON mapping classes
-    public class CountryData
-    {
-        [JsonProperty("name")]
-        public string Name { get; set; } = string.Empty;
 
-        [JsonProperty("iso3")]
-        public string Iso3 { get; set; } = string.Empty;
 
-        [JsonProperty("iso2")]
-        public string Iso2 { get; set; } = string.Empty;
 
-        [JsonProperty("numeric_code")]
-        public string? NumericCode { get; set; }
-
-        [JsonProperty("phonecode")]
-        public string? PhoneCode { get; set; }
-
-        [JsonProperty("capital")]
-        public string? Capital { get; set; }
-
-        [JsonProperty("currency")]
-        public string? Currency { get; set; }
-
-        [JsonProperty("currency_name")]
-        public string? CurrencyName { get; set; }
-
-        [JsonProperty("currency_symbol")]
-        public string? CurrencySymbol { get; set; }
-
-        [JsonProperty("tld")]
-        public string? Tld { get; set; }
-
-        [JsonProperty("native")]
-        public string? Native { get; set; }
-
-        [JsonProperty("region")]
-        public string? Region { get; set; }
-
-        [JsonProperty("region_id")]
-        public int? RegionId { get; set; }
-
-        [JsonProperty("subregion")]
-        public string? Subregion { get; set; }
-
-        [JsonProperty("subregion_id")]
-        public int? SubregionId { get; set; }
-
-        [JsonProperty("nationality")]
-        public string? Nationality { get; set; }
-
-        [JsonProperty("latitude")]
-        public decimal? Latitude { get; set; }
-
-        [JsonProperty("longitude")]
-        public decimal? Longitude { get; set; }
-
-        [JsonProperty("emoji")]
-        public string? Emoji { get; set; }
-
-        [JsonProperty("emojiU")]
-        public string? EmojiU { get; set; }
-
-        [JsonProperty("timezones")]
-        public List<Timezones>? Timezones { get; set; }
-
-        [JsonProperty("states")]
-        public List<StateData>? States { get; set; }
-    }
-
-    public class Timezones
-    {
-        [JsonProperty("zoneName")]
-        public string ZoneName { get; set; } = string.Empty;
-
-        [JsonProperty("gmtOffset")]
-        public int GmtOffset { get; set; }
-
-        [JsonProperty("gmtOffsetName")]
-        public string GmtOffsetName { get; set; } = string.Empty;
-
-        [JsonProperty("abbreviation")]
-        public string? Abbreviation { get; set; }
-
-        [JsonProperty("tzName")]
-        public string? TzName { get; set; }
-    }
-
-    public class StateData
-    {
-        [JsonProperty("id")]
-        public int OriginalId { get; set; }
-
-        [JsonProperty("name")]
-        public string Name { get; set; } = string.Empty;
-
-        [JsonProperty("state_code")]
-        public string? StateCode { get; set; }
-
-        [JsonProperty("latitude")]
-        public decimal? Latitude { get; set; }
-
-        [JsonProperty("longitude")]
-        public decimal? Longitude { get; set; }
-
-        [JsonProperty("type")]
-        public string? Type { get; set; }
     }
 }

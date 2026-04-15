@@ -4,7 +4,7 @@ namespace NextCgm.DataEntities.Nginx
 {
     public class NginxSyncLog
     {
-        public Guid NginxSyncLogID = Uuid7.NewGuid();
+        public Guid NginxSyncLogID { get; set; } = Uuid7.NewUuid7();
         public long Id { get; set; }
         public Guid ContainerEntityId { get; set; }
         public DateTime SyncTimestamp { get; set; }

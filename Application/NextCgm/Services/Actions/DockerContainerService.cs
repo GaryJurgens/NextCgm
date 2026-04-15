@@ -11,17 +11,25 @@ using System.Net.NetworkInformation;
 
 namespace NextCgm.Services.Actions
 {
-    public class DockerContainerService
+    public interface IDockerContainerService
+    {
+        public Task<int> GeneratePortInRange(int startPort, int endPort);
+        Task<CreateContainerResponseDTO> CreateDockerContainer();
+    }
+
+    public class DockerContainerService : IDockerContainerService
     {
         private readonly AppDBContext _context;
 
         private readonly string SubDomainGen = Helpers.SubDomainGenerator.NameGenerator.GetAdjNatio();
         private readonly DockerOptions _options;
+        private readonly INginxService _nginxService;
 
-        public DockerContainerService(AppDBContext context, IOptions<DockerOptions> options)
+        public DockerContainerService(AppDBContext context, IOptions<DockerOptions> options, INginxService nginxService)
         {
             _context = context;
             _options = options.Value;
+            _nginxService = nginxService;
         }
 
         public async Task<CreateContainerResponseDTO> CreateDockerContainer()
@@ -50,7 +58,7 @@ namespace NextCgm.Services.Actions
 
                 // GeneratePortInRange exposed ports
 
-                int ExposedPort = GeneratePortInRange(8000, 9000);
+                int ExposedPort = await GeneratePortInRange(8000, 9000);
 
                 await _context.DockerLogger.AddAsync(new DockerLogger
                 {
@@ -83,7 +91,7 @@ namespace NextCgm.Services.Actions
 
                 await _context.DockerContainers.AddAsync(new DockerContainers
                 {
-                    ContaierID = Uuid7.NewUuid7(),
+                    DockerContainersID = Uuid7.NewUuid7(),
                     InstanceID = containerId,
                     AppUniqueName = SubDomainGen,
                     DockerLable = "Owner=" + SubDomainGen,
@@ -173,7 +181,7 @@ namespace NextCgm.Services.Actions
                     // 3. Save to Database only after confirmed Running
                     var newContainerRecord = new DockerContainers
                     {
-                        ContaierID = Uuid7.NewUuid7(),
+                        DockerContainersID = Uuid7.NewUuid7(),
                         InstanceID = containerId,
                         AppUniqueName = SubDomainGen,
                         ImageNameInUse = _options.ImageName,
@@ -200,6 +208,26 @@ namespace NextCgm.Services.Actions
                         HostPortRight = _options.ContainerPort,
                         DockerStatus = finalStatus
                     }); await _context.SaveChangesAsync();
+
+                    // Create Nginx Mapping
+                    var nginxRequest = new CreateNginxMappingRequestDTO
+                    {
+                        Success = true,
+                        Message = "Requesting Nginx Mapping",
+                        Payload = new Shared.ApiViewModels.NginxApiViewModel
+                        {
+                            DockerContainerID = newContainerRecord.DockerContainersID,
+                            Hostname = SubDomainGen + _options.EndDomain,
+                            PathPrefix = "/",
+                            ExternalPort = 80, // Default HTTP port
+                            InternalAddress = containerId, // Or IP if available
+                            InternalPort = _options.ContainerPort,
+                            EnableWebSockets = true,
+                            ClientMaxBodySizeMb = 10,
+                            SslCertName = ""
+                        }
+                    };
+                    await _nginxService.CreateNginxMappingAsync(nginxRequest);
 
                     return new CreateContainerResponseDTO
                     {
@@ -282,7 +310,7 @@ namespace NextCgm.Services.Actions
             }
         }
 
-        public static int GeneratePortInRange(int startPort, int endPort)
+        public async Task<int> GeneratePortInRange(int startPort, int endPort)
         {
             try
             {

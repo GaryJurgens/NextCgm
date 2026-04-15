@@ -18,7 +18,7 @@ namespace NextCgm.DContentext
 
         public DbSet<ProvinceStateList> ProvinceStateLists { get; set; }
 
-        public DbSet<TimeZones> TimeZones { get; set; }
+        public DbSet<TimeZoneData> TimeZoneData { get; set; }
 
         public DbSet<DockerContainers> DockerContainers { get; set; }
 

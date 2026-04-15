@@ -6,7 +6,7 @@ namespace NextCgm.DataEntities.Containers
 {
     public class DockerContainers
     {
-        public Guid ContaierID { get; set; }
+        public Guid DockerContainersID { get; set; }
 
         public Guid UserEntityID { get; set; }
         public UserEntity? UserEntity { get; set; }

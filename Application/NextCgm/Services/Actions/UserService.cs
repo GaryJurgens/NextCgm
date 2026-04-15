@@ -7,7 +7,12 @@ using NextCgm.Shared.DTOS;
 
 namespace NextCgm.Services.Actions
 {
-    public class UserService
+    public interface IUserService
+    {
+        Task<GetUserResponseDTO> CreateUserAsync(GetUserRequestDTO request);
+    }
+
+    public class UserService : IUserService
     {
         // 1. Fields go here (At the top of the CLASS)
         private readonly AppDBContext _context;

@@ -5,7 +5,7 @@ namespace NextCgm.DataEntities.Nginx
 {
     public class NginxRoutingRule
     {
-        public Guid NginxRoutingRuleID { get; set; } = Uuid7.NewGuid();
+        public Guid NginxRoutingRuleID { get; set; } = Uuid7.NewUuid7();
         public Guid DockerContainerID { get; set; }
         public virtual DockerContainers Container { get; set; }
 

@@ -6,7 +6,7 @@ namespace NextCgm.DataEntities.Nginx
     public class NginxContainer
     {
 
-        public Guid NginxContainerID = Uuid7.NewGuid();
+        public Guid NginxContainerID { get; set; } = Uuid7.NewGuid();
 
         // Relationship to your Docker Container
         public Guid DockerContainerID { get; set; }

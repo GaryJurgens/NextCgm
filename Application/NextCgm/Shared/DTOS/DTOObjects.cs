@@ -152,4 +152,38 @@ namespace NextCgm.Shared.DTOS
             };
         }
     }
+
+    public class CreateNginxMappingRequestDTO
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; }
+        public NginxApiViewModel? Payload { get; set; }
+
+        public static CreateNginxMappingRequestDTO Failure(string msg)
+        {
+            return new CreateNginxMappingRequestDTO
+            {
+                Success = false,
+                Message = msg,
+                Payload = null
+            };
+        }
+    }
+
+    public class CreateNginxMappingResponseDTO
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; }
+        public NginxApiViewModel? Payload { get; set; }
+
+        public static CreateNginxMappingResponseDTO Failure(string msg)
+        {
+            return new CreateNginxMappingResponseDTO
+            {
+                Success = false,
+                Message = msg,
+                Payload = null
+            };
+        }
+    }
 }

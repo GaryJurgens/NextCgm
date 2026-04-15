@@ -4,7 +4,7 @@ namespace NextCgm.DataEntities
 {
     public class DockerLogger
     {
-        public Guid DockerLoggerID = Uuid7.NewGuid();
+        public Guid DockerLoggerID { get; set; } = Uuid7.NewUuid7();
         public string DockerInstanceID { get; set; } = string.Empty; // this is the unique identifier for the docker instance, and is used to map to the user's container and database. This can be a combination of the user's first name, last name, and a unique identifier, such as Dolfie1234567890, where Dolfie is the user's first name, and 1234567890 is a unique identifier for this user. This is used to create a unique API key and to identify the user in the system.
         public string DockerInstanceName { get; set; } = string.Empty; // this is the Fiendly URl adolfie-alpah.mydomain.com
 
