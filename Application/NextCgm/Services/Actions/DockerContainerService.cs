@@ -26,13 +26,15 @@ namespace NextCgm.Services.Actions
         private readonly DockerOptions _options;
         private readonly INginxService _nginxService;
         private readonly IDocumentDbService _documentDbService;
+        private readonly ICloudflareService _cloudflareService;
 
-        public DockerContainerService(AppDBContext context, IOptions<DockerOptions> options, INginxService nginxService, IDocumentDbService documentDbService)
+        public DockerContainerService(AppDBContext context, IOptions<DockerOptions> options, INginxService nginxService, IDocumentDbService documentDbService, ICloudflareService cloudflareService)
         {
             _context = context;
             _options = options.Value;
             _nginxService = nginxService;
             _documentDbService = documentDbService;
+            _cloudflareService = cloudflareService;
         }
 
         public async Task<CreateContainerResponseDTO> CreateDockerContainer()
@@ -243,6 +245,21 @@ namespace NextCgm.Services.Actions
                         }
                     };
                     await _documentDbService.CreateDatabaseAsync(dbRequest);
+
+                    // Create Cloudflare DNS Record
+                    var dnsRequest = new CreateDnsRecordRequestDTO
+                    {
+                        Subdomain = SubDomainGen,
+                        RecordType = "A",
+                        Proxied = true
+                    };
+                    var dnsResponse = await _cloudflareService.CreateDnsRecordAsync(dnsRequest);
+                    
+                    if (dnsResponse.Success)
+                    {
+                        newContainerRecord.CloudflareRecordId = dnsResponse.RecordId;
+                        await _context.SaveChangesAsync();
+                    }
 
                     return new CreateContainerResponseDTO
                     {

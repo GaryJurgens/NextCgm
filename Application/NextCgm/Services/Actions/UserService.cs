@@ -19,10 +19,10 @@ namespace NextCgm.Services.Actions
     {
         // 1. Fields go here (At the top of the CLASS)
         private readonly AppDBContext _context;
-        private readonly IJwtTokenGenerator _jwtTokenGenerator;
+        private readonly  Helpers.Utils.IJwtTokenGenerator _jwtTokenGenerator;
 
         // 2. Constructor goes here (Also at the top of the CLASS)
-        public UserService(AppDBContext context, IJwtTokenGenerator jwtTokenGenerator)
+        public UserService(AppDBContext context, Helpers.Utils.IJwtTokenGenerator jwtTokenGenerator)
         {
             _context = context;
             _jwtTokenGenerator = jwtTokenGenerator;

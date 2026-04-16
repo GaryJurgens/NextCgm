@@ -45,6 +45,11 @@ builder.Services.Configure<NginxUnitOptions>(
 builder.Services.Configure<DocumentDbOptions>(
     builder.Configuration.GetSection("DocumentDbSettings"));
 
+builder.Services.Configure<CloudflareOptions>(
+    builder.Configuration.GetSection("CloudflareSettings"));
+
+builder.Services.AddHttpClient<ICloudflareService, CloudflareService>();
+
 builder.Services.AddScoped<INginxService,NginxService>();
 builder.Services.AddScoped<IDockerContainerService,DockerContainerService>();
 builder.Services.AddScoped<IDocumentDbService,DocumentDbService>();

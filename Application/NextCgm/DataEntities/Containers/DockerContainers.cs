@@ -48,6 +48,7 @@ namespace NextCgm.DataEntities.Containers
 
         public string DockerLable { get; set;  }
 
+        public string? CloudflareRecordId { get; set; }
 
     }
 }

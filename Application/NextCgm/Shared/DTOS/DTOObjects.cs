@@ -306,4 +306,48 @@ namespace NextCgm.Shared.DTOS
             };
         }
     }
+
+    public class CreateDnsRecordRequestDTO
+    {
+        public string Subdomain { get; set; } = string.Empty;
+        public string RecordType { get; set; } = "A"; // "A" or "CNAME"
+        public string? Target { get; set; } // If null, uses TargetIp from config for A records
+        public bool Proxied { get; set; } = true;
+    }
+
+    public class CreateDnsRecordResponseDTO
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; } = string.Empty;
+        public string RecordId { get; set; } = string.Empty;
+
+        public static CreateDnsRecordResponseDTO Failure(string msg)
+        {
+            return new CreateDnsRecordResponseDTO
+            {
+                Success = false,
+                Message = msg
+            };
+        }
+    }
+
+    public class RemoveDnsRecordRequestDTO
+    {
+        public string RecordId { get; set; } = string.Empty;
+    }
+
+    public class RemoveDnsRecordResponseDTO
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; } = string.Empty;
+
+        public static RemoveDnsRecordResponseDTO Failure(string msg)
+        {
+            return new RemoveDnsRecordResponseDTO
+            {
+                Success = false,
+                Message = msg
+            };
+        }
+    }
 }
