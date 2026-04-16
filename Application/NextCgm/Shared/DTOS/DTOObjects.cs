@@ -284,4 +284,26 @@ namespace NextCgm.Shared.DTOS
             };
         }
     }
+
+    public class StopContainerRequestDTO
+    {
+        public Guid DockerContainersID { get; set; }
+    }
+
+    public class StopContainerResponseDTO
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; }
+        public ContainerApiViewModel? Payload { get; set; }
+
+        public static StopContainerResponseDTO Failure(string msg)
+        {
+            return new StopContainerResponseDTO
+            {
+                Success = false,
+                Message = msg,
+                Payload = null
+            };
+        }
+    }
 }

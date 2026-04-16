@@ -15,6 +15,7 @@ namespace NextCgm.Services.Actions
     {
         public Task<int> GeneratePortInRange(int startPort, int endPort);
         Task<CreateContainerResponseDTO> CreateDockerContainer();
+        Task<StopContainerResponseDTO> StopDockerContainer(StopContainerRequestDTO request);
     }
 
     public class DockerContainerService : IDockerContainerService
@@ -347,6 +348,72 @@ namespace NextCgm.Services.Actions
             catch (Exception ex)
             {
                 throw new Exception("Error generating port: " + ex.Message);
+            }
+        }
+
+        public async Task<StopContainerResponseDTO> StopDockerContainer(StopContainerRequestDTO request)
+        {
+            try
+            {
+                var containerRecord = await _context.DockerContainers.FindAsync(request.DockerContainersID);
+                if (containerRecord == null)
+                {
+                    return StopContainerResponseDTO.Failure("Container record not found in the database.");
+                }
+
+                var client = new DockerClientConfiguration().CreateClient();
+
+                // Stop the container using Docker API
+                var stopped = await client.Containers.StopContainerAsync(containerRecord.InstanceID, new ContainerStopParameters
+                {
+                    WaitBeforeKillSeconds = 10
+                });
+
+                if (stopped)
+                {
+                    containerRecord.DockerStatus = DockerContainerStatus.Exited.ToString();
+                    containerRecord.StoppedAt = DateTime.UtcNow;
+
+                    await _context.DockerLogger.AddAsync(new DockerLogger
+                    {
+                        DockerLoggerID = Uuid7.NewUuid7(),
+                        LogMessage = $"Container stopped successfully.",
+                        FriendlyContanierName = containerRecord.AppUniqueName,
+                        ContainerStatus = DockerContainerStatus.Exited.ToString(),
+                        DockerInstanceID = containerRecord.InstanceID,
+                        CreatedAt = DateTime.UtcNow
+                    });
+
+                    await _context.SaveChangesAsync();
+
+                    return new StopContainerResponseDTO
+                    {
+                        Success = true,
+                        Message = "Container stopped successfully.",
+                        Payload = new Shared.ApiViewModels.ContainerApiViewModel
+                        {
+                            InstanceID = containerRecord.InstanceID,
+                            FriendlyContainerURL = containerRecord.AppUniqueName,
+                            DockerStatus = containerRecord.DockerStatus
+                        }
+                    };
+                }
+                else
+                {
+                    return StopContainerResponseDTO.Failure("Failed to stop the container via Docker API.");
+                }
+            }
+            catch (DockerContainerNotFoundException ex)
+            {
+                return StopContainerResponseDTO.Failure("Docker container not found on the host.");
+            }
+            catch (DockerApiException ex)
+            {
+                return StopContainerResponseDTO.Failure($"Docker API Error: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                return StopContainerResponseDTO.Failure($"An error occurred: {ex.Message}");
             }
         }
     }
