@@ -27,7 +27,6 @@ namespace NextCgm.DataEntities.Nginx
         public bool EnableWebSockets { get; set; }  // Required if your C# app uses SignalR
         public int ClientMaxBodySizeMb { get; set; } = 10;
         public string SslCertName { get; set; }
-
-
+        public object SslCertKey { get; internal set; }
     }
 }

@@ -16,6 +16,11 @@
     {
         public string ApiBaseUrl { get; set; }
         public string DefaultAppRoot { get; set; }
+
+        public string SSLCertPath { get; set; }
+
+        public string SSLKeyPath { get; set; }
+
         // This comes from AppConfig
     }
 }
