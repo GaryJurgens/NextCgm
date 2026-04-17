@@ -4,8 +4,14 @@
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 USER $APP_UID
 WORKDIR /app
+
+# ADD THESE LINES HERE
+ENV ASPNETCORE_HTTP_PORTS=8080
+ENV ASPNETCORE_URLS=http://+:8080
+ENV ASPNETCORE_ENVIRONMENT=Development
 EXPOSE 8080
 EXPOSE 8081
+
 
 
 # This stage is used to build the service project

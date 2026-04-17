@@ -3,8 +3,20 @@ using NextCgm.Helpers.Utils;
 using NextCgm.Services.Actions;
 using NextCgm.DContentext;
 using Microsoft.EntityFrameworkCore;
+using FastEndpoints;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("DevCorsPolicy", policy =>
+    {
+        policy.WithOrigins("http://localhost:5174") // Your Vue Port
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 // Add services to the container.
 builder.Services.AddDbContext<AppDBContext>(options =>
@@ -56,6 +68,7 @@ builder.Services.AddScoped<IDocumentDbService,DocumentDbService>();
 builder.Services.AddScoped<IUserService,UserService>();
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddFastEndpoints();
 
 builder.Services.AddScoped<IDataSeedService, DataSeedService>();
 
@@ -92,7 +105,9 @@ using (var scope = app.Services.CreateScope())
 
 //// end seed services
 
+app.UseCors("DevCorsPolicy");
 
+app.UseFastEndpoints();
 
 // Configure the HTTP request pipeline.
 
