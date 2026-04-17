@@ -5,8 +5,12 @@ using NextCgm.Helpers.Utils;
 using NextCgm.Shared.ApiViewModels;
 using NextCgm.Shared.DTOS;
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using Medo;
+using Docker.DotNet;
+using Docker.DotNet.Models;
+using System.Collections.Generic;
 
 namespace NextCgm.Services.Actions
 {
@@ -65,6 +69,57 @@ namespace NextCgm.Services.Actions
 
                 _context.NginxRoutingRules.Add(routingRule);
 
+                // Generate Nginx configuration
+                string confContent = $@"
+server {{
+    listen 80;
+    server_name {request.Payload.Hostname};
+
+    location {request.Payload.PathPrefix} {{
+        proxy_pass http://{request.Payload.InternalAddress}:{request.Payload.InternalPort};
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+";
+                if (request.Payload.EnableWebSockets)
+                {
+                    confContent += @"
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection ""upgrade"";
+";
+                }
+                confContent += $@"
+        client_max_body_size {request.Payload.ClientMaxBodySizeMb}M;
+    }}
+}}
+";
+                // Ensure directory exists
+                if (!Directory.Exists(_options.ConfigDirectory))
+                {
+                    Directory.CreateDirectory(_options.ConfigDirectory);
+                }
+
+                // Write file
+                string confFilePath = Path.Combine(_options.ConfigDirectory, $"{request.Payload.Hostname}.conf");
+                await File.WriteAllTextAsync(confFilePath, confContent);
+
+                // Reload Nginx via Docker API
+                var dockerUri = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows)
+                    ? new Uri("npipe://./pipe/docker_engine")
+                    : new Uri("unix:///var/run/docker.sock");
+                var client = new DockerClientConfiguration(dockerUri).CreateClient();
+
+                var execCreateResponse = await client.Exec.ExecCreateContainerAsync(_options.NginxContainerName, new ContainerExecCreateParameters
+                {
+                    AttachStdout = true,
+                    AttachStderr = true,
+                    Cmd = new List<string> { "nginx", "-s", "reload" }
+                });
+
+                await client.Exec.StartContainerExecAsync(execCreateResponse.ID);
+
                 // 3. Log to NginxSyncLog
                 var syncLog = new NginxSyncLog
                 {
@@ -73,7 +128,7 @@ namespace NextCgm.Services.Actions
                     SyncTimestamp = DateTime.UtcNow,
                     WasSuccessful = true,
                     LastErrorCode = string.Empty,
-                    RawJsonSent = "{\"status\":\"pending_sync\"}" // Placeholder for actual Nginx API request
+                    RawJsonSent = confContent
                 };
 
                 _context.NginxSyncLogs.Add(syncLog);

@@ -23,6 +23,9 @@
 
         public string KeyPath { get; set; }
 
+        public string ConfigDirectory { get; set; } = "/app/nginx_conf";
+        public string NginxContainerName { get; set; } = "nginx-ui";
+
         // This comes from AppConfig
     }
 }
