@@ -54,6 +54,8 @@ builder.Services.AddScoped<INginxService,NginxService>();
 builder.Services.AddScoped<IDockerContainerService,DockerContainerService>();
 builder.Services.AddScoped<IDocumentDbService,DocumentDbService>();
 builder.Services.AddScoped<IUserService,UserService>();
+builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddScoped<IDataSeedService, DataSeedService>();
 

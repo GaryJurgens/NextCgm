@@ -51,6 +51,88 @@ namespace NextCgm.Shared.DTOS
         }
     }
 
+    public class LogoutResponseDTO
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; }
+
+        public static LogoutResponseDTO Failure(string msg)
+        {
+            return new LogoutResponseDTO
+            {
+                Success = false,
+                Message = msg
+            };
+        }
+    }
+
+    public class ForgotPasswordRequestDTO
+    {
+        public string EmailUsername { get; set; }
+    }
+
+    public class ForgotPasswordResponseDTO
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; }
+
+        public static ForgotPasswordResponseDTO Failure(string msg)
+        {
+            return new ForgotPasswordResponseDTO
+            {
+                Success = false,
+                Message = msg
+            };
+        }
+    }
+
+    public class ResetPasswordRequestDTO
+    {
+        public string EmailUsername { get; set; }
+        public string VerificationCode { get; set; }
+        public string NewPassword { get; set; }
+    }
+
+    public class ResetPasswordResponseDTO
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; }
+
+        public static ResetPasswordResponseDTO Failure(string msg)
+        {
+            return new ResetPasswordResponseDTO
+            {
+                Success = false,
+                Message = msg
+            };
+        }
+    }
+
+    public class VerifyOtpRequestDTO
+    {
+        public string EmailUsername { get; set; }
+        public string VerificationCode { get; set; }
+    }
+
+    public class VerifyOtpResponseDTO
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; }
+        public string Token { get; set; } // Optional, if verifying OTP logs them in
+        public UserApiViewModel? Payload { get; set; }
+
+        public static VerifyOtpResponseDTO Failure(string msg)
+        {
+            return new VerifyOtpResponseDTO
+            {
+                Success = false,
+                Message = msg,
+                Token = string.Empty,
+                Payload = null
+            };
+        }
+    }
+
     public class CreateUserResponseDTO
     {
         public bool Success { get; set; }

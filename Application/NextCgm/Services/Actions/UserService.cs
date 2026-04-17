@@ -12,20 +12,24 @@ namespace NextCgm.Services.Actions
     {
         Task<GetUserResponseDTO> CreateUserAsync(CreateUserRequestDTO request);
         Task<LoginResponseDTO> LoginAsync(LoginRequestDTO request);
+        Task<LogoutResponseDTO> LogoutAsync(Guid userId);
         Task<RemoveUserResponseDTO> RemoveUserAsync(RemoveUserRequestDTO request);
+        Task<ForgotPasswordResponseDTO> ForgotPasswordAsync(ForgotPasswordRequestDTO request);
+        Task<ResetPasswordResponseDTO> ResetPasswordAsync(ResetPasswordRequestDTO request);
+        Task<VerifyOtpResponseDTO> VerifyOtpAsync(VerifyOtpRequestDTO request);
     }
 
     public class UserService : IUserService
     {
-        // 1. Fields go here (At the top of the CLASS)
         private readonly AppDBContext _context;
-        private readonly  Helpers.Utils.IJwtTokenGenerator _jwtTokenGenerator;
+        private readonly IJwtTokenGenerator _jwtTokenGenerator;
+        private readonly IEmailService _emailService;
 
-        // 2. Constructor goes here (Also at the top of the CLASS)
-        public UserService(AppDBContext context, Helpers.Utils.IJwtTokenGenerator jwtTokenGenerator)
+        public UserService(AppDBContext context, IJwtTokenGenerator jwtTokenGenerator, IEmailService emailService)
         {
             _context = context;
             _jwtTokenGenerator = jwtTokenGenerator;
+            _emailService = emailService;
         }
 
         public async Task<LoginResponseDTO> LoginAsync(LoginRequestDTO request)
@@ -41,23 +45,33 @@ namespace NextCgm.Services.Actions
                 return LoginResponseDTO.Failure("Invalid credentials");
             }
 
-            var token = _jwtTokenGenerator.GenerateToken(user);
+            // Generate and send OTP for login
+            user.VerificationCode = Guid.NewGuid().ToString().Substring(0, 8).ToUpper();
+            user.VerificationCodeExpiry = DateTime.UtcNow.AddMinutes(15);
+            user.VerificationCodeSentTime = DateTime.UtcNow;
 
-            var viewModel = new UserApiViewModel
-            {
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                UserSubDomain = $"{user.UserSubDomain}.nextcgm.com",
-                ApiKeyForNightScout = user.ApiKeyForNightScout,
-                DockerStatus = user.DockerStatus.ToString()
-            };
+            await _context.SaveChangesAsync();
+
+            await _emailService.SendVerificationCodeAsync(user.EmailUsername, user.FirstName, user.VerificationCode);
 
             return new LoginResponseDTO
             {
                 Success = true,
-                Message = "Login successful",
-                Token = token,
-                Payload = viewModel
+                Message = "OTP sent to your email. Please verify to complete login.",
+                Token = string.Empty,
+                Payload = null
+            };
+        }
+
+        public async Task<LogoutResponseDTO> LogoutAsync(Guid userId)
+        {
+            // In a stateless JWT setup, logout is usually handled client-side by deleting the token.
+            // If we want to invalidate it server-side, we would need a token blacklist or refresh token rotation.
+            // For now, we just return success.
+            return new LogoutResponseDTO
+            {
+                Success = true,
+                Message = "Logged out successfully"
             };
         }
 
@@ -79,17 +93,13 @@ namespace NextCgm.Services.Actions
             };
         }
 
-        // 3. The Method goes here
         public async Task<GetUserResponseDTO> CreateUserAsync(CreateUserRequestDTO request)
         {
-            // A. Generate identifiers
             string generatedSubDomain = NameGenerator.GetAdjNatio();
             string generatedApiKey = NameGenerator.GetAdjColorNato(false);
 
-            // B. Initialize the Entity
             var newUser = new UserEntity
             {
-                // Accessing properties from your request DTO
                 FirstName = request.Payload.FirstName,
                 LastName = request.Payload.LastName,
                 EmailUsername = request.Payload.EmailUsername,
@@ -98,6 +108,7 @@ namespace NextCgm.Services.Actions
                 IsEmailVerified = false,
                 VerificationCode = Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
                 VerificationCodeExpiry = DateTime.UtcNow.AddHours(24),
+                VerificationCodeSentTime = DateTime.UtcNow,
                 UserSubDomain = generatedSubDomain,
                 ApiKeyForNightScout = generatedApiKey,
                 CountryListID = request.Payload.CountryListID,
@@ -107,11 +118,12 @@ namespace NextCgm.Services.Actions
 
             try
             {
-                // C. Save to Postgres
-                _context.UserEntities.Add(newUser); // Fixed: using 'newUser'
+                _context.UserEntities.Add(newUser);
                 await _context.SaveChangesAsync();
 
-                // D. Map to your ViewModel
+                // Send OTP for registration
+                await _emailService.SendVerificationCodeAsync(newUser.EmailUsername, newUser.FirstName, newUser.VerificationCode);
+
                 var viewModel = new UserApiViewModel
                 {
                     FirstName = newUser.FirstName,
@@ -124,7 +136,7 @@ namespace NextCgm.Services.Actions
                 return new GetUserResponseDTO
                 {
                     Success = true,
-                    Message = "User created successfully. Provisioning container...",
+                    Message = "User created successfully. OTP sent to email. Provisioning container...",
                     Payload = viewModel
                 };
             }
@@ -137,6 +149,103 @@ namespace NextCgm.Services.Actions
                     Payload = null
                 };
             }
+        }
+
+        public async Task<ForgotPasswordResponseDTO> ForgotPasswordAsync(ForgotPasswordRequestDTO request)
+        {
+            var user = await _context.UserEntities.FirstOrDefaultAsync(u => u.EmailUsername == request.EmailUsername);
+            if (user == null)
+            {
+                // Don't reveal that the user doesn't exist
+                return new ForgotPasswordResponseDTO
+                {
+                    Success = true,
+                    Message = "If your email is registered, you will receive an OTP."
+                };
+            }
+
+            user.VerificationCode = Guid.NewGuid().ToString().Substring(0, 8).ToUpper();
+            user.VerificationCodeExpiry = DateTime.UtcNow.AddMinutes(15);
+            user.VerificationCodeSentTime = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            await _emailService.SendVerificationCodeAsync(user.EmailUsername, user.FirstName, user.VerificationCode);
+
+            return new ForgotPasswordResponseDTO
+            {
+                Success = true,
+                Message = "If your email is registered, you will receive an OTP."
+            };
+        }
+
+        public async Task<ResetPasswordResponseDTO> ResetPasswordAsync(ResetPasswordRequestDTO request)
+        {
+            var user = await _context.UserEntities.FirstOrDefaultAsync(u => u.EmailUsername == request.EmailUsername);
+            if (user == null)
+            {
+                return ResetPasswordResponseDTO.Failure("Invalid request");
+            }
+
+            if (user.VerificationCode != request.VerificationCode || user.VerificationCodeExpiry < DateTime.UtcNow)
+            {
+                return ResetPasswordResponseDTO.Failure("Invalid or expired verification code");
+            }
+
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+            user.VerificationCode = string.Empty; // Clear the code after use
+            
+            await _context.SaveChangesAsync();
+
+            return new ResetPasswordResponseDTO
+            {
+                Success = true,
+                Message = "Password reset successfully"
+            };
+        }
+
+        public async Task<VerifyOtpResponseDTO> VerifyOtpAsync(VerifyOtpRequestDTO request)
+        {
+            var user = await _context.UserEntities.FirstOrDefaultAsync(u => u.EmailUsername == request.EmailUsername);
+            if (user == null)
+            {
+                return VerifyOtpResponseDTO.Failure("Invalid request");
+            }
+
+            if (user.VerificationCode != request.VerificationCode || user.VerificationCodeExpiry < DateTime.UtcNow)
+            {
+                return VerifyOtpResponseDTO.Failure("Invalid or expired verification code");
+            }
+
+            // Mark email as verified if it wasn't
+            if (!user.IsEmailVerified)
+            {
+                user.IsEmailVerified = true;
+            }
+
+            user.VerificationCode = string.Empty; // Clear code after successful verification
+            user.LastLogin = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            var token = _jwtTokenGenerator.GenerateToken(user);
+
+            var viewModel = new UserApiViewModel
+            {
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                UserSubDomain = $"{user.UserSubDomain}.nextcgm.com",
+                ApiKeyForNightScout = user.ApiKeyForNightScout,
+                DockerStatus = user.DockerStatus.ToString()
+            };
+
+            return new VerifyOtpResponseDTO
+            {
+                Success = true,
+                Message = "OTP verified successfully",
+                Token = token,
+                Payload = viewModel
+            };
         }
     }
 }
