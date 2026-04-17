@@ -47,8 +47,8 @@ namespace NextCgm.Services.Actions
                     InternalPort = request.Payload.InternalPort,
                     EnableWebSockets = request.Payload.EnableWebSockets,
                     ClientMaxBodySizeMb = request.Payload.ClientMaxBodySizeMb,
-                    SslCertName = _options.SSLCertPath,
-                    SslCertKey = _options.SSLKeyPath
+                    SslCertName = _options.CertificatePath ?? "",
+                    SslCertKey = _options.KeyPath ?? ""
                 };
 
                 _context.NginxContainers.Add(nginxContainer);

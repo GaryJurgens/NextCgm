@@ -14,7 +14,7 @@ namespace NextCgm.Services.Actions
     public interface IDockerContainerService
     {
         public Task<int> GeneratePortInRange(int startPort, int endPort);
-        Task<CreateContainerResponseDTO> CreateDockerContainer();
+        Task<CreateContainerResponseDTO> CreateDockerContainer(Guid userId);
         Task<StopContainerResponseDTO> StopDockerContainer(StopContainerRequestDTO request);
     }
 
@@ -37,12 +37,15 @@ namespace NextCgm.Services.Actions
             _cloudflareService = cloudflareService;
         }
 
-        public async Task<CreateContainerResponseDTO> CreateDockerContainer()
+        public async Task<CreateContainerResponseDTO> CreateDockerContainer(Guid userId)
         {
             try
             {
                 // 1. Initialize the client (Standard for Windows/Linux)
-                var client = new DockerClientConfiguration().CreateClient();
+                var dockerUri = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows)
+                    ? new Uri("npipe://./pipe/docker_engine")
+                    : new Uri("unix:///var/run/docker.sock");
+                var client = new DockerClientConfiguration(dockerUri).CreateClient();
 
                 // 2. Pull the image first (Docker won't create a container if image is missing)
                 await client.Images.CreateImageAsync(
@@ -63,7 +66,7 @@ namespace NextCgm.Services.Actions
 
                 // GeneratePortInRange exposed ports
 
-                int ExposedPort = await GeneratePortInRange(8000, 9000);
+                int ExposedPort = await GeneratePortInRange(10000, 20000);
 
                 await _context.DockerLogger.AddAsync(new DockerLogger
                 {
@@ -79,12 +82,18 @@ namespace NextCgm.Services.Actions
                 {
                     Image = _options.ImageName,
                     Name = SubDomainGen,
+                    Env = _options.EnvironmentVariables,
+                    ExposedPorts = new Dictionary<string, EmptyStruct>
+                    {
+                        { _options.ContainerPort.ToString() + "/tcp", default(EmptyStruct) }
+                    },
 
                     HostConfig = new HostConfig
                     {
+                        RestartPolicy = new RestartPolicy { Name = RestartPolicyKind.Always },
                         PortBindings = new Dictionary<string, IList<PortBinding>>
                     {
-                         { _options.ContainerPort.ToString(), new List<PortBinding> { new PortBinding { HostPort = ExposedPort.ToString() } } }
+                         { _options.ContainerPort.ToString() + "/tcp", new List<PortBinding> { new PortBinding { HostPort = ExposedPort.ToString() } } }
                      }
                     }
                 });
@@ -94,9 +103,10 @@ namespace NextCgm.Services.Actions
                 bool isFullyStarted = false;
                 string finalStatus = DockerContainerStatus.Error.ToString();
 
-                await _context.DockerContainers.AddAsync(new DockerContainers
+                var newContainerRecord = new DockerContainers
                 {
                     DockerContainersID = Uuid7.NewUuid7(),
+                    UserEntityID = userId,
                     InstanceID = containerId,
                     AppUniqueName = SubDomainGen,
                     DockerLable = "Owner=" + SubDomainGen,
@@ -105,7 +115,8 @@ namespace NextCgm.Services.Actions
                     HostPortRight = _options.ContainerPort,
                     DockerStatus = DockerContainerStatus.Created.ToString(),
                     CreatedAt = DateTime.UtcNow
-                });
+                };
+                await _context.DockerContainers.AddAsync(newContainerRecord);
                 await _context.SaveChangesAsync();
 
                 await _context.DockerLogger.AddAsync(new DockerLogger
@@ -184,19 +195,8 @@ namespace NextCgm.Services.Actions
                 if (isFullyStarted)
                 {
                     // 3. Save to Database only after confirmed Running
-                    var newContainerRecord = new DockerContainers
-                    {
-                        DockerContainersID = Uuid7.NewUuid7(),
-                        InstanceID = containerId,
-                        AppUniqueName = SubDomainGen,
-                        ImageNameInUse = _options.ImageName,
-                        ExposedPortLeft = ExposedPort,
-                        HostPortRight = _options.ContainerPort,
-                        DockerStatus = DockerContainerStatus.Running.ToString(),
-                        CreatedAt = DateTime.UtcNow
-                    };
-
-                    await _context.DockerContainers.AddAsync(newContainerRecord);
+                    newContainerRecord.DockerStatus = DockerContainerStatus.Running.ToString();
+                    _context.DockerContainers.Update(newContainerRecord);
                     await _context.SaveChangesAsync();
 
                     await _context.DockerLogger.AddAsync(new DockerLogger
@@ -346,13 +346,28 @@ namespace NextCgm.Services.Actions
         {
             try
             {
-                var properties = IPGlobalProperties.GetIPGlobalProperties();
-                var activeEndPoints = properties.GetActiveTcpListeners();
+                // Since this app runs in a container, we cannot check the host's active TCP listeners.
+                // Instead, we query the database for ports already assigned to our containers.
+                var usedPorts = _context.DockerContainers
+                    .Where(c => c.ExposedPortLeft >= startPort && c.ExposedPortLeft <= endPort)
+                    .Select(c => c.ExposedPortLeft)
+                    .ToList();
 
-                // Get all ports currently in use
-                var usedPorts = activeEndPoints.Select(p => p.Port).ToList();
+                // Start from a random port in the range to avoid collisions with host services
+                // that might be using the lower end of the range (like 8000).
+                Random rnd = new Random();
+                int initialPort = rnd.Next(startPort, endPort + 1);
 
-                for (int port = startPort; port <= endPort; port++)
+                for (int port = initialPort; port <= endPort; port++)
+                {
+                    if (!usedPorts.Contains(port))
+                    {
+                        return port;
+                    }
+                }
+                
+                // Wrap around if needed
+                for (int port = startPort; port < initialPort; port++)
                 {
                     if (!usedPorts.Contains(port))
                     {
@@ -378,7 +393,10 @@ namespace NextCgm.Services.Actions
                     return StopContainerResponseDTO.Failure("Container record not found in the database.");
                 }
 
-                var client = new DockerClientConfiguration().CreateClient();
+                var dockerUri = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows)
+                    ? new Uri("npipe://./pipe/docker_engine")
+                    : new Uri("unix:///var/run/docker.sock");
+                var client = new DockerClientConfiguration(dockerUri).CreateClient();
 
                 // Stop the container using Docker API
                 var stopped = await client.Containers.StopContainerAsync(containerRecord.InstanceID, new ContainerStopParameters

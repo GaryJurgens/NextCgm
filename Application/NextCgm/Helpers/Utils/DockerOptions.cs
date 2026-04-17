@@ -9,6 +9,8 @@
 
         public string EndDomain { get; set; } = string.Empty;
 
+        public List<string> EnvironmentVariables { get; set; } = new List<string>();
+
         
     }
 
@@ -17,9 +19,9 @@
         public string ApiBaseUrl { get; set; }
         public string DefaultAppRoot { get; set; }
 
-        public string SSLCertPath { get; set; }
+        public string CertificatePath { get; set; }
 
-        public string SSLKeyPath { get; set; }
+        public string KeyPath { get; set; }
 
         // This comes from AppConfig
     }

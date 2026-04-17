@@ -2,6 +2,7 @@
 {
     using System;
     using System.IO;
+    using System.Linq;
 
     public static class NameGenerator
     {
@@ -25,12 +26,22 @@
             {
                 if (_isInitialized) return;
 
-                _adjectives = File.ReadAllLines(adjectivesPath);
-                _colors = File.ReadAllLines(colorsPath);
-                _nato = File.ReadAllLines(natoPath);
+                _adjectives = ParseFile(adjectivesPath);
+                _colors = ParseFile(colorsPath);
+                _nato = ParseFile(natoPath);
 
                 _isInitialized = true;
             }
+        }
+
+        private static string[] ParseFile(string path)
+        {
+            if (!File.Exists(path)) return new string[0];
+            var text = File.ReadAllText(path);
+            return text.Split(new[] { ',', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries)
+                       .Select(w => w.Trim())
+                       .Where(w => !string.IsNullOrEmpty(w))
+                       .ToArray();
         }
 
         public static string GetAdjNatio()
@@ -49,6 +60,12 @@
 
             // The standard 3-word pattern: ADJ-COLOR-NATO
             return $"{Pick(_adjectives)}-{Pick(_colors)}-{Pick(_nato)}".ToLower();
+        }
+
+        public static string GetApiKey()
+        {
+            // A singular word and a number
+            return $"{Pick(_nato)}{_rng.Next(100, 9999)}".ToLower();
         }
 
         private static string Pick(string[] words)

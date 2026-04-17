@@ -96,7 +96,16 @@ namespace NextCgm.Services.Actions
         public async Task<GetUserResponseDTO> CreateUserAsync(CreateUserRequestDTO request)
         {
             string generatedSubDomain = NameGenerator.GetAdjNatio();
-            string generatedApiKey = NameGenerator.GetAdjColorNato(false);
+            while (await _context.UserEntities.AnyAsync(u => u.UserSubDomain == generatedSubDomain))
+            {
+                generatedSubDomain = NameGenerator.GetAdjNatio();
+            }
+
+            string generatedApiKey = NameGenerator.GetApiKey();
+            while (await _context.UserEntities.AnyAsync(u => u.ApiKeyForNightScout == generatedApiKey))
+            {
+                generatedApiKey = NameGenerator.GetApiKey();
+            }
 
             var newUser = new UserEntity
             {

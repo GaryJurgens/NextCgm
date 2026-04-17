@@ -13,12 +13,12 @@ namespace NextCgm.DataEntities
         public bool IsError { get; set; } // this is a flag that indicates whether the log message is an error or not, and is used for filtering and sorting purposes. This can be set to true for error messages, and false for non-error messages.
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow; // this is the timestamp that indicates when the log message was created, and is used for sorting and filtering purposes. This can be set to the current UTC time when the log message is created, and can be used to track the history of the docker instance's operation over time.
-        public string FriendlyContanierName { get; set; }
-        public string ContainerStatus { get; internal set; }
-        public string ImageNameInUse { get; internal set; }
-        public string ExeptionMessage { get; internal set; }
+        public string FriendlyContanierName { get; set; } = string.Empty;
+        public string ContainerStatus { get; internal set; } = string.Empty;
+        public string ImageNameInUse { get; internal set; } = string.Empty;
+        public string ExeptionMessage { get; internal set; } = string.Empty;
         public int ExposedPortLeft { get; internal set; }
         public int HostPortRight { get; internal set; }
-        public string DockerStatus { get; internal set; }
+        public string DockerStatus { get; internal set; } = string.Empty;
     }
 }

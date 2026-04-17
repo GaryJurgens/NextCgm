@@ -1,6 +1,7 @@
 using FastEndpoints;
 using NextCgm.Services.Actions;
 using NextCgm.Shared.DTOS;
+using System.Security.Claims;
 
 namespace NextCgm.Endpoints
 {
@@ -16,6 +17,7 @@ namespace NextCgm.Endpoints
         public override void Configure()
         {
             Post("/api/Containers/CreateContainer");
+            
             // Require authentication
             Summary(s =>
             {
@@ -28,7 +30,14 @@ namespace NextCgm.Endpoints
         {
             try
             {
-                var response = await _dockerContainerService.CreateDockerContainer();
+                var userIdClaim = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+                if (!Guid.TryParse(userIdClaim, out var userId))
+                {
+                    ThrowError("User ID not found", 400);
+                    return;
+                }
+
+                var response = await _dockerContainerService.CreateDockerContainer(userId);
                 if (response.Success)
                 {
                     await Send.OkAsync(response,  ct);

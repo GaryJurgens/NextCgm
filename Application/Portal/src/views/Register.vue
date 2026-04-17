@@ -18,6 +18,37 @@
         <label>Password</label>
         <input type="password" v-model="password" required />
       </div>
+
+      <div class="form-group">
+        <label>Country</label>
+        <select v-model="selectedCountry" @change="onCountryChange" required>
+          <option value="" disabled>Select Country</option>
+          <option v-for="country in countries" :key="country.countryListID" :value="country.countryListID">
+            {{ country.name }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group" v-if="states.length > 0">
+        <label>State/Province</label>
+        <select v-model="selectedState" required>
+          <option value="" disabled>Select State/Province</option>
+          <option v-for="state in states" :key="state.provinceStateListID" :value="state.provinceStateListID">
+            {{ state.name }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group" v-if="timeZones.length > 0">
+        <label>Time Zone</label>
+        <select v-model="selectedTimeZone" required>
+          <option value="" disabled>Select Time Zone</option>
+          <option v-for="tz in timeZones" :key="tz.timeZoneDataID" :value="tz.timeZoneDataID">
+            {{ tz.zoneName }} ({{ tz.gmtOffsetName }})
+          </option>
+        </select>
+      </div>
+
       <button type="submit" :disabled="loading">Register</button>
       <p v-if="error" class="error">{{ error }}</p>
     </form>
@@ -26,7 +57,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '../services/api';
 
@@ -38,6 +69,50 @@ const password = ref('');
 const loading = ref(false);
 const error = ref('');
 
+const countries = ref([]);
+const states = ref([]);
+const timeZones = ref([]);
+
+const selectedCountry = ref('');
+const selectedState = ref('');
+const selectedTimeZone = ref('');
+
+onMounted(async () => {
+  try {
+    const response = await api.getCountries();
+    if (response.data.success) {
+      countries.value = response.data.payload;
+    }
+  } catch (err) {
+    console.error('Failed to load countries', err);
+  }
+});
+
+const onCountryChange = async () => {
+  selectedState.value = '';
+  selectedTimeZone.value = '';
+  states.value = [];
+  timeZones.value = [];
+
+  if (!selectedCountry.value) return;
+
+  try {
+    const [statesRes, tzRes] = await Promise.all([
+      api.getStates(selectedCountry.value),
+      api.getTimeZones(selectedCountry.value)
+    ]);
+
+    if (statesRes.data.success) {
+      states.value = statesRes.data.payload;
+    }
+    if (tzRes.data.success) {
+      timeZones.value = tzRes.data.payload;
+    }
+  } catch (err) {
+    console.error('Failed to load states or timezones', err);
+  }
+};
+
 const handleRegister = async () => {
   loading.value = true;
   error.value = '';
@@ -47,11 +122,13 @@ const handleRegister = async () => {
         FirstName: firstName.value,
         LastName: lastName.value,
         EmailUsername: email.value,
-        PasswordHash: password.value // The backend might hash it, but we send it here
+        PasswordHash: password.value,
+        CountryListID: selectedCountry.value,
+        ProvinceStateListID: selectedState.value || "00000000-0000-0000-0000-000000000000",
+        TimeZoneID: selectedTimeZone.value || "00000000-0000-0000-0000-000000000000"
       }
     });
     if (response.data.success) {
-      // Registration successful, send to OTP verification
       localStorage.setItem('emailForOtp', email.value);
       router.push('/verify-otp');
     } else {
@@ -81,7 +158,7 @@ const handleRegister = async () => {
   display: block;
   margin-bottom: 5px;
 }
-.form-group input {
+.form-group input, .form-group select {
   width: 100%;
   padding: 8px;
   box-sizing: border-box;

@@ -10,7 +10,7 @@ namespace NextCgm.DataEntities.Nginx
         public DateTime SyncTimestamp { get; set; }
 
         public bool WasSuccessful { get; set; }
-        public string LastErrorCode { get; set; }
-        public string RawJsonSent { get; set; } // Good for debugging API failures
+        public string LastErrorCode { get; set; } = string.Empty;
+        public string RawJsonSent { get; set; } = string.Empty; // Good for debugging API failures
     }
 }

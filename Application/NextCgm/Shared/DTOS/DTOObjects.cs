@@ -15,7 +15,7 @@ namespace NextCgm.Shared.DTOS
     public class LoginResponseDTO
     {
         public bool Success { get; set; }
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
         public string Token { get; set; }
         public UserApiViewModel? Payload { get; set; }
 
@@ -39,7 +39,7 @@ namespace NextCgm.Shared.DTOS
     public class RemoveUserResponseDTO
     {
         public bool Success { get; set; }
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
 
         public static RemoveUserResponseDTO Failure(string msg)
         {
@@ -54,7 +54,7 @@ namespace NextCgm.Shared.DTOS
     public class LogoutResponseDTO
     {
         public bool Success { get; set; }
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
 
         public static LogoutResponseDTO Failure(string msg)
         {
@@ -74,7 +74,7 @@ namespace NextCgm.Shared.DTOS
     public class ForgotPasswordResponseDTO
     {
         public bool Success { get; set; }
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
 
         public static ForgotPasswordResponseDTO Failure(string msg)
         {
@@ -96,7 +96,7 @@ namespace NextCgm.Shared.DTOS
     public class ResetPasswordResponseDTO
     {
         public bool Success { get; set; }
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
 
         public static ResetPasswordResponseDTO Failure(string msg)
         {
@@ -117,7 +117,7 @@ namespace NextCgm.Shared.DTOS
     public class VerifyOtpResponseDTO
     {
         public bool Success { get; set; }
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
         public string Token { get; set; } // Optional, if verifying OTP logs them in
         public UserApiViewModel? Payload { get; set; }
 
@@ -136,7 +136,7 @@ namespace NextCgm.Shared.DTOS
     public class CreateUserResponseDTO
     {
         public bool Success { get; set; }
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
         public UserApiViewModel? Payload { get; set; }
         // Static helper for quick errors
         public static CreateUserResponseDTO Failure(string msg)
@@ -153,7 +153,7 @@ namespace NextCgm.Shared.DTOS
     public class  CreateUserRequestDTO
     {
         public bool Success { get; set; }
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
         public UserApiViewModel? Payload { get; set; }
         // Static helper for quick errors
         public static CreateUserResponseDTO Failure(string msg)
@@ -171,7 +171,7 @@ namespace NextCgm.Shared.DTOS
     public class GetUserResponseDTO
     {
         public bool Success { get; set; }
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
         public UserApiViewModel? Payload { get; set; }
 
         // Static helper for quick errors
@@ -191,7 +191,7 @@ namespace NextCgm.Shared.DTOS
     public class CreateContainerResponseDTO // this is the response DTO for the GetContainer API endpoint, which is used to get the container information for a user. This
     {
         public bool Success { get; set; }
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
         public ContainerApiViewModel? Payload { get; set; }
 
         // Static helper for quick errors
@@ -209,7 +209,7 @@ namespace NextCgm.Shared.DTOS
     public class GetContainerRequestDTO // single container request, for example when creating a new container, or getting the status of a specific container. For getting all containers for a user, we can use a different DTO that returns a list of containers.
     {
         public bool Success { get; set; }
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
         public ContainerApiViewModel? Payload { get; set; }
 
         // Static helper for quick errors
@@ -227,7 +227,7 @@ namespace NextCgm.Shared.DTOS
     public class GetAllContainersResponseDTO // this is the response DTO for the GetAllContainers API endpoint, which is used to get all the containers for a user. This can return a list of containers, and can also include pagination information if needed.
     {
         public bool Success { get; set; }
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
         public List<ContainerApiViewModel>? Payload { get; set; }
 
         // Static helper for quick errors
@@ -245,7 +245,7 @@ namespace NextCgm.Shared.DTOS
     public class GetAllContainersRequestDTO // this is the request DTO for the GetAllContainers API endpoint, which is used to get all the containers for a user. This can include filters for pagination, such as page number and page size, or filters for container status, etc.
     {
         public bool Success { get; set; }
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
         public List<ContainerApiViewModel>? Payload { get; set; }
 
         // Static helper for quick errors
@@ -263,7 +263,7 @@ namespace NextCgm.Shared.DTOS
     public class CreateContainerRequestDTO // this is the request DTO for the CreateContainer API endpoint, which is used to create a new container for a user. This can include the necessary information for creating a container, such as the base image name, environment variables, etc.
     {
         public bool Success { get; set; }
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
         public ContainerApiViewModel? Payload { get; set; }
 
         // Static helper for quick errors
@@ -281,7 +281,7 @@ namespace NextCgm.Shared.DTOS
     public class GetAllContinaersByUserRequestDTO // this is the request DTO for the GetAllContainersByUser API endpoint, which is used to get all the containers for a specific user. This can include the user ID as a parameter, and can also include filters for pagination, container status, etc.
     {
         public bool Success { get; set; }
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
 
         public int CurrentPage { get; set; } = 1; // for pagination, default to page 1
         public int PageSize { get; set; } = 10; // for pagination, default to 10 items per page
@@ -302,7 +302,7 @@ namespace NextCgm.Shared.DTOS
     public class CreateNginxMappingRequestDTO
     {
         public bool Success { get; set; }
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
         public NginxApiViewModel? Payload { get; set; }
 
         public static CreateNginxMappingRequestDTO Failure(string msg)
@@ -319,7 +319,7 @@ namespace NextCgm.Shared.DTOS
     public class CreateNginxMappingResponseDTO
     {
         public bool Success { get; set; }
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
         public NginxApiViewModel? Payload { get; set; }
 
         public static CreateNginxMappingResponseDTO Failure(string msg)
@@ -336,7 +336,7 @@ namespace NextCgm.Shared.DTOS
     public class CreateDocumentDbRequestDTO
     {
         public bool Success { get; set; }
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
         public DocumentDbApiViewModel? Payload { get; set; }
 
         public static CreateDocumentDbRequestDTO Failure(string msg)
@@ -353,7 +353,7 @@ namespace NextCgm.Shared.DTOS
     public class CreateDocumentDbResponseDTO
     {
         public bool Success { get; set; }
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
         public DocumentDbApiViewModel? Payload { get; set; }
 
         public static CreateDocumentDbResponseDTO Failure(string msg)
@@ -375,7 +375,7 @@ namespace NextCgm.Shared.DTOS
     public class StopContainerResponseDTO
     {
         public bool Success { get; set; }
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
         public ContainerApiViewModel? Payload { get; set; }
 
         public static StopContainerResponseDTO Failure(string msg)
@@ -431,5 +431,47 @@ namespace NextCgm.Shared.DTOS
                 Message = msg
             };
         }
+    }
+
+    public class CountryDTO
+    {
+        public Guid CountryListID { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Iso2 { get; set; } = string.Empty;
+    }
+
+    public class ProvinceStateDTO
+    {
+        public Guid ProvinceStateListID { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string StateCode { get; set; } = string.Empty;
+    }
+
+    public class TimeZoneDTO
+    {
+        public Guid TimeZoneDataID { get; set; }
+        public string ZoneName { get; set; } = string.Empty;
+        public string GmtOffsetName { get; set; } = string.Empty;
+    }
+
+    public class GetCountriesResponseDTO
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; } = string.Empty;
+        public List<CountryDTO>? Payload { get; set; }
+    }
+
+    public class GetStatesResponseDTO
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; } = string.Empty;
+        public List<ProvinceStateDTO>? Payload { get; set; }
+    }
+
+    public class GetTimeZonesResponseDTO
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; } = string.Empty;
+        public List<TimeZoneDTO>? Payload { get; set; }
     }
 }

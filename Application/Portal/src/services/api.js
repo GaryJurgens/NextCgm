@@ -30,5 +30,14 @@ export default {
   },
   createContainer(data) {
     return api.post('/Containers/CreateContainer', data);
+  },
+  getCountries() {
+    return api.get('/Locations/Countries');
+  },
+  getStates(countryId) {
+    return api.get(`/Locations/States/${countryId}`);
+  },
+  getTimeZones(countryId) {
+    return api.get(`/Locations/TimeZones/${countryId}`);
   }
 };

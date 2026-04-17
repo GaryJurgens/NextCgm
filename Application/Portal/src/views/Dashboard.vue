@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard-container">
     <header>
-      <h2>Welcome, {{ user?.FirstName }} ({{ user?.UserSubDomain }})</h2>
+      <h2>Welcome, {{ user?.firstName }} ({{ user?.userSubDomain }})</h2>
       <button @click="logout" class="logout-btn">Logout</button>
     </header>
 
@@ -18,12 +18,12 @@
         <p>You don't have any containers yet.</p>
       </div>
       <div v-else class="container-grid">
-        <div v-for="container in containers" :key="container.id || container.DockerContainersID || container.InstanceID" class="container-card">
-          <h4>{{ container.FriendlyContainerURL || 'Unnamed Container' }}</h4>
-          <p><strong>Status:</strong> {{ container.DockerStatus }}</p>
-          <p><strong>Image:</strong> {{ container.ImageNameInUse || container.BaseImageContaierName }}</p>
-          <p v-if="container.FriendlyContainerURL">
-            <strong>URL:</strong> <a :href="'https://' + container.FriendlyContainerURL" target="_blank">{{ container.FriendlyContainerURL }}</a>
+        <div v-for="container in containers" :key="container.id || container.dockerContainersID || container.instanceID" class="container-card">
+          <h4>{{ container.friendlyContainerURL || 'Unnamed Container' }}</h4>
+          <p><strong>Status:</strong> {{ container.dockerStatus }}</p>
+          <p><strong>Image:</strong> {{ container.imageNameInUse || container.baseImageContaierName }}</p>
+          <p v-if="container.friendlyContainerURL">
+            <strong>URL:</strong> <a :href="'https://' + container.friendlyContainerURL" target="_blank">{{ container.friendlyContainerURL }}</a>
           </p>
         </div>
       </div>
@@ -47,8 +47,8 @@ onMounted(() => {
   if (userData) {
     user.value = JSON.parse(userData);
     // The user payload might already contain containers
-    if (user.value.DockerContainers) {
-      containers.value = user.value.DockerContainers;
+    if (user.value.dockerContainers) {
+      containers.value = user.value.dockerContainers;
     }
   } else {
     router.push('/login');

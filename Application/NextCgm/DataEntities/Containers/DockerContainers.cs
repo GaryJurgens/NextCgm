@@ -32,12 +32,12 @@ namespace NextCgm.DataEntities.Containers
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime StoppedAt { get; set; }
         public DateTime RemovedAt { get; set; }
-        public string ImageName { get; internal set; }
-        public string ImageNameInUse { get; set; }
+        public string ImageName { get; internal set; } = string.Empty;
+        public string ImageNameInUse { get; set; } = string.Empty;
         public int HostPortRight { get; internal set; }
-        public string DockerStatusExeption { get; internal set; }
+        public string DockerStatusExeption { get; internal set; } = string.Empty;
 
-        public string ContainerIpAddress { get; set; } // Internal Docker Network IP
+        public string ContainerIpAddress { get; set; } = string.Empty; // Internal Docker Network IP
 
         // --- NGINX Unit Specifics ---
         public string AppUniqueName { get; set; } = string.Empty; // this is the URL that the user will use to access the container, and is used for mapping to the host machine. This can be a combination of the base image name and a unique identifier, such as Nightscout-Mary-1234567890, where Nightscout-Mary is the base image name, and 1234567890 is a unique identifier for this instance. This is used to create a unique container name and to identify the container in the system.
@@ -46,7 +46,7 @@ namespace NextCgm.DataEntities.Containers
         //Internal Network IP: If NGINX is running outside the Docker network, you'll route via the Host Port. If NGINX is inside the same Docker network, you need to store the NetworkSettings.IPAddress to tell NGINX where to send packets.
         public string? IPAddress { get; set; }
 
-        public string DockerLable { get; set;  }
+        public string DockerLable { get; set;  } = string.Empty;
 
         public string? CloudflareRecordId { get; set; }
 

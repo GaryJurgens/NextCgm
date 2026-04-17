@@ -7,10 +7,12 @@ namespace NextCgm.DataEntities.Nginx
     {
         public Guid NginxRoutingRuleID { get; set; } = Uuid7.NewUuid7();
         public Guid DockerContainerID { get; set; }
+
+        [System.ComponentModel.DataAnnotations.Schema.ForeignKey("DockerContainerID")]
         public virtual DockerContainers Container { get; set; }
 
         // --- External Facing ---
-        public string ExternalHost { get; set; } // e.g., "alpha.myapp.com"
+        public string ExternalHost { get; set; } = string.Empty; // e.g., "alpha.myapp.com"
         public int ListenPort { get; set; }      // e.g., 80 or 443
 
         // --- Internal NGINX -> Docker Routing ---

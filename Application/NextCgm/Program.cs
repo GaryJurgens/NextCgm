@@ -5,14 +5,19 @@ using NextCgm.DContentext;
 using Microsoft.EntityFrameworkCore;
 using FastEndpoints;
 
+using FastEndpoints.Security;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddAuthenticationJwtBearer(s => s.SigningKey = builder.Configuration["JwtSettings:Key"] ?? "f6eb6266-0f27-4f69-bb23-f2ba9d2b8335");
+builder.Services.AddAuthorization();
 
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("DevCorsPolicy", policy =>
     {
-        policy.WithOrigins("http://localhost:5174") // Your Vue Port
+        policy.WithOrigins("*") // Your Vue Port
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -66,6 +71,7 @@ builder.Services.AddScoped<INginxService,NginxService>();
 builder.Services.AddScoped<IDockerContainerService,DockerContainerService>();
 builder.Services.AddScoped<IDocumentDbService,DocumentDbService>();
 builder.Services.AddScoped<IUserService,UserService>();
+builder.Services.AddScoped<ILocationService,LocationService>();
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddFastEndpoints();
@@ -106,6 +112,9 @@ using (var scope = app.Services.CreateScope())
 //// end seed services
 
 app.UseCors("DevCorsPolicy");
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseFastEndpoints();
 
