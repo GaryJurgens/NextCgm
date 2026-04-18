@@ -8,6 +8,8 @@
         public int ContainerPort { get; set; } = 80;
 
         public string EndDomain { get; set; } = string.Empty;
+        public bool IsLocalDevelopment { get; set; } = true;
+        public string DockerNetworkName { get; set; } = "nextcgm_network";
 
         public List<string> EnvironmentVariables { get; set; } = new List<string>();
 

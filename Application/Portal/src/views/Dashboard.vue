@@ -1,7 +1,10 @@
 <template>
   <div class="dashboard-container">
     <header>
-      <h2>Welcome, {{ user?.firstName }} ({{ user?.userSubDomain }})</h2>
+      <div>
+        <h2>Welcome, {{ user?.firstName }} ({{ user?.userSubDomain }})</h2>
+        <p class="api-key"><strong>Your Nightscout API Key:</strong> <code>{{ user?.apiKeyForNightScout }}</code></p>
+      </div>
       <button @click="logout" class="logout-btn">Logout</button>
     </header>
 
@@ -94,6 +97,17 @@ header {
   margin-bottom: 30px;
   padding-bottom: 10px;
   border-bottom: 1px solid #ddd;
+}
+.api-key {
+  margin-top: 5px;
+  font-size: 14px;
+  color: #555;
+}
+.api-key code {
+  background-color: #f4f4f4;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
 }
 .logout-btn {
   padding: 8px 16px;

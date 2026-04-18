@@ -41,6 +41,30 @@ namespace NextCgm.Services.Actions
         {
             try
             {
+                var user = await _context.UserEntities.FindAsync(userId);
+                if (user == null)
+                {
+                    return new CreateContainerResponseDTO
+                    {
+                        Success = false,
+                        Message = "User not found.",
+                    };
+                }
+
+                // Prepare environment variables, replacing any placeholder API_SECRET with the user's actual API key
+                var envVars = new List<string>();
+                foreach (var env in _options.EnvironmentVariables)
+                {
+                    if (env.StartsWith("API_SECRET="))
+                    {
+                        envVars.Add($"API_SECRET={user.ApiKeyForNightScout}");
+                    }
+                    else
+                    {
+                        envVars.Add(env);
+                    }
+                }
+
                 // 1. Initialize the client (Standard for Windows/Linux)
                 var dockerUri = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows)
                     ? new Uri("npipe://./pipe/docker_engine")
@@ -78,24 +102,34 @@ namespace NextCgm.Services.Actions
                 });
                 await _context.SaveChangesAsync();
 
+                var hostConfig = new HostConfig
+                {
+                    RestartPolicy = new RestartPolicy { Name = RestartPolicyKind.Always }
+                };
+
+                if (_options.IsLocalDevelopment)
+                {
+                    hostConfig.PortBindings = new Dictionary<string, IList<PortBinding>>
+                    {
+                        { _options.ContainerPort.ToString() + "/tcp", new List<PortBinding> { new PortBinding { HostPort = ExposedPort.ToString() } } }
+                    };
+                }
+                else
+                {
+                    // In production, attach to a specific Docker network so containers can resolve each other by name
+                    hostConfig.NetworkMode = _options.DockerNetworkName;
+                }
+
                 var response = await client.Containers.CreateContainerAsync(new CreateContainerParameters
                 {
                     Image = _options.ImageName,
                     Name = SubDomainGen,
-                    Env = _options.EnvironmentVariables,
+                    Env = envVars,
                     ExposedPorts = new Dictionary<string, EmptyStruct>
                     {
                         { _options.ContainerPort.ToString() + "/tcp", default(EmptyStruct) }
                     },
-
-                    HostConfig = new HostConfig
-                    {
-                        RestartPolicy = new RestartPolicy { Name = RestartPolicyKind.Always },
-                        PortBindings = new Dictionary<string, IList<PortBinding>>
-                    {
-                         { _options.ContainerPort.ToString() + "/tcp", new List<PortBinding> { new PortBinding { HostPort = ExposedPort.ToString() } } }
-                     }
-                    }
+                    HostConfig = hostConfig
                 });
 
                 // 4. Try to inspect the container to see if it exists
@@ -225,8 +259,8 @@ namespace NextCgm.Services.Actions
                             Hostname = SubDomainGen + _options.EndDomain,
                             PathPrefix = "/",
                             ExternalPort = 80, // Default HTTP port
-                            InternalAddress = "host.docker.internal", // Route via host to avoid Docker network isolation issues
-                            InternalPort = ExposedPort, // Use the host port we just bound
+                            InternalAddress = _options.IsLocalDevelopment ? "host.docker.internal" : SubDomainGen, // Route via host locally, or via Docker DNS in production
+                            InternalPort = _options.IsLocalDevelopment ? ExposedPort : _options.ContainerPort, // Use the host port locally, or the internal port in production
                             EnableWebSockets = true,
                             ClientMaxBodySizeMb = 10,
                             SslCertName = ""
