@@ -225,8 +225,8 @@ namespace NextCgm.Services.Actions
                             Hostname = SubDomainGen + _options.EndDomain,
                             PathPrefix = "/",
                             ExternalPort = 80, // Default HTTP port
-                            InternalAddress = containerId, // Or IP if available
-                            InternalPort = _options.ContainerPort,
+                            InternalAddress = "host.docker.internal", // Route via host to avoid Docker network isolation issues
+                            InternalPort = ExposedPort, // Use the host port we just bound
                             EnableWebSockets = true,
                             ClientMaxBodySizeMb = 10,
                             SslCertName = ""
