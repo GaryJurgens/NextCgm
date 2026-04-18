@@ -285,7 +285,9 @@ namespace NextCgm.Services.Actions
                     {
                         Subdomain = SubDomainGen,
                         RecordType = "A",
-                        Proxied = true
+                        Target = _options.TargetIp,
+                        Proxied = true,
+                        TargetIp = _options.TargetIp,
                     };
                     var dnsResponse = await _cloudflareService.CreateDnsRecordAsync(dnsRequest);
                     

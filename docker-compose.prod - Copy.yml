@@ -22,7 +22,11 @@ services:
   nextcgm-backend:
     # Replace "yourdockerhubusername" with your actual Docker Hub username
     image: gary450450/nextcgm-backend:latest
-       # Run as root so the container can access the mounted docker.sock
+    build: 
+      context: ./Application/NextCgm
+      dockerfile: Dockerfile
+    container_name: nextcgm-backend
+    # Run as root so the container can access the mounted docker.sock
     user: root
     volumes:
       # Mount the Docker socket so the .NET app can spin up new containers

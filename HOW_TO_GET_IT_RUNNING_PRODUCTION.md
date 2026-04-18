@@ -30,6 +30,9 @@ Open a terminal (PowerShell or Command Prompt) in `C:\GitHub_Repos\NextCgm` and 
 
 2. **Build the Image:**
    ```bash
+to build the new image
+docker-compose build nextcgm-backend
+
    docker-compose -f docker-compose.prod.yml build
    ```
    *(This compiles your .NET application and tags it with your Docker Hub username)*
@@ -43,6 +46,15 @@ Open a terminal (PowerShell or Command Prompt) in `C:\GitHub_Repos\NextCgm` and 
 ---
 
 ## Step 4: Prepare the VPS
+
+stop all containers
+
+docker stop $(docker ps -aq)
+
+remove all containers 
+docker rm $(docker ps -aq)
+
+
 Now, your VPS doesn't need your source code at all! It only needs the `docker-compose.prod.yml` file.
 
 1. Copy **only** the `docker-compose.prod.yml` file from your local machine to a folder on your VPS (e.g., `/opt/nextcgm/`).
@@ -83,9 +95,30 @@ The application is fully equipped to automatically create DNS records for every 
 ## Step 6: Run it on your VPS
 1. SSH into your VPS and navigate to the folder where you placed the `docker-compose.prod.yml` file.
 2. Run this single command to start the entire stack:
+ foce docker to pull latest image
+
+docker-compose pull
+
+
+docker-compose up -d
+
+
+if containers are stuck, ie container error
+
+ docker rm -f nextcgm-backend nginx-ui nextcgm-backend or just // docker rm -f nextcgm-backend nginx-ui
+
+prune Branches ro remove stuck conainers
+
+
+docker system prune
+
+then try this
+
+docker compose up -d
+
 
 ```bash
-docker-compose -f docker-compose.prod.yml up -d
+docker-compose -f docker-compose.prod.yml up -d --build   / docker-compose -f docker-compose.yml up -d --build
 ```
 
 Docker on your VPS will automatically:
@@ -95,6 +128,35 @@ Docker on your VPS will automatically:
 - Spin everything up instantly and connect them together!
 
 ---
+
+## Ngix for Api.nextcgm.co.za
+
+Add site 
+
+server api.nextcgm.com
+
+location 
+
+proxy_pass http://nextcgm-backend:8080;
+include proxy_params;
+proxy_set_header Host $host;
+proxy_set_header X-Real-IP $remote_addr;
+proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+proxy_set_header X-Forwarded-Proto $scheme;
+
+
+if ssl step gives problems
+
+location must be a /
+
+then this must be pasted, it removes a path
+
+proxy_pass http://nextcgm-backend:8080;
+proxy_set_header Host $host;
+proxy_set_header X-Real-IP $remote_addr;
+proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+proxy_set_header X-Forwarded-Proto $scheme;
+
 
 ## ⚠️ Important Production Notes
 - **Docker Socket Security:** Mounting `/var/run/docker.sock` gives the container full control over the host's Docker daemon. Ensure your VPS is properly secured and only accessible via SSH keys.

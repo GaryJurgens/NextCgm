@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:32771/api',
+  baseURL: 'https://api.nextcgm.co.za/api',
   headers: {
     'Content-Type': 'application/json',
   },

@@ -12,8 +12,7 @@
         public string DockerNetworkName { get; set; } = "nextcgm_network";
 
         public List<string> EnvironmentVariables { get; set; } = new List<string>();
-
-        
+        public string TargetIp { get; set; } = String.Empty;
     }
 
     public class NginxUnitOptions

@@ -392,9 +392,11 @@ namespace NextCgm.Shared.DTOS
     public class CreateDnsRecordRequestDTO
     {
         public string Subdomain { get; set; } = string.Empty;
-        public string RecordType { get; set; } = "A"; // "A" or "CNAME"
+        public string RecordType { get; set; } = "CNAME"; // "A" or "CNAME"
         public string? Target { get; set; } // If null, uses TargetIp from config for A records
         public bool Proxied { get; set; } = true;
+
+        public string TargetIp { get; set; } = string.Empty; // This is used if Target is null and RecordType is "A". It can be set from the configuration or passed in the request.
     }
 
     public class CreateDnsRecordResponseDTO
