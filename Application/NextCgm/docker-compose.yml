@@ -1,0 +1,65 @@
+services:
+  # --- Nginx Proxy Manager ---
+  nginx-proxy-manager:
+    image: 'jc21/nginx-proxy-manager:latest'
+    container_name: nginx-proxy-manager
+    restart: unless-stopped
+    ports:
+      - '80:80'              # Public HTTP
+      - '443:443'            # Public HTTPS
+      - '81:81'              # Admin Web UI
+    environment:
+      - TZ=Africa/Johannesburg
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+    networks:
+      - nextcgm_network
+
+  # --- NextCgm Backend ---
+  nextcgm-backend:
+    image: gary450450/nextcgm-backend:latest
+    container_name: nextcgm-backend
+    user: root
+    ports:
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - DockerSettings__IsLocalDevelopment=false
+      - DockerSettings__DockerNetworkName=nextcgm_network
+    restart: always
+    networks:
+      - nextcgm_network
+
+  # --- Nightscout (CGM Remote Monitor) ---
+  nightscout:
+    image: nightscout/cgm-remote-monitor:latest
+    container_name: nightscout
+    restart: always
+    ports:
+      - "1337:1337"
+    environment:
+      - INSECURE_USE_HTTP=true
+      - API_SECRET=adolfieoros450450
+      - MONGO_CONNECTION=mongodb://nightscoutcgm:C7NLstoHoeTC6c5KPef2Wd2Zfq0YRd2MCj7Yvy8jSzPxvtO15rxofBqLtNaldK5X498BGnAdqcTQACDbrowASQ%3D%3D@nightscoutcgm.mongo.cosmos.azure.com:10255/nightscout?ssl=true&appName=%40nightscoutcgm%40&retryWrites=false&replicaSet=globaldb&readPreference=primary&maxIdleTimeMS=120000&connectTimeoutMS=10000&authSource=admin&authMechanism=SCRAM-SHA-1
+      - DISPLAY_UNITS=mmol/L
+      - ALARM_TYPES=none
+      - ALARM_URGENT_HIGH=off
+      - ALARM_HIGH=off
+      - ALARM_LOW=off
+      - ALARM_URGENT_LOW=off
+      - ALARM_TIMEAGO_WARN=off
+      - ALARM_TIMEAGO_URGENT=off
+      - SHOW_FORECAST=true
+      - DBSIZE_MAX=20000
+      - DBSIZE_IN_MB=true
+    networks:
+      - nextcgm_network
+
+networks:
+  nextcgm_network:
+    name: nextcgm_network
+    driver: bridge

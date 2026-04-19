@@ -1,0 +1,47 @@
+services:
+  # --- Nginx Proxy Manager ---
+  app:
+    image: 'jc21/nginx-proxy-manager:latest'
+    container_name: nginx-proxy-manager
+    restart: unless-stopped
+    ports:
+      - '80:80'              # Public HTTP
+      - '443:443'            # Public HTTPS
+      - '81:81'              # Admin Web UI
+    environment:
+      - TZ=Africa/Johannesburg # Matches your VPS location
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+    networks:
+      - nextcgm_network
+
+  # --- Your C# Backend ---
+  nextcgm-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: gary450450/nextcgm-backend:latest
+    container_name: nextcgm-backend
+    user: root
+    # Port 8080 remains exposed for direct IP testing, 
+    # but Nginx will talk to it internally.
+    ports:
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./nginx_data/nginx:/app/nginx_data/nginx
+      - ./nginx_data/nginx-ui:/app/nginx_data/nginx-ui
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - DockerSettings__IsLocalDevelopment=false
+      - DockerSettings__DockerNetworkName=nextcgm_network
+    restart: always
+    networks:
+      - nextcgm_network
+
+networks:
+  nextcgm_network:
+    name: nextcgm_network
+    driver: bridge
