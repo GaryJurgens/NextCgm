@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NextCgm.DataEntities;
+using NextCgm.DataEntities.Cloudflare;
 using NextCgm.DataEntities.Containers;
 using NextCgm.DataEntities.DocumentDatabases;
 using NextCgm.DataEntities.Locations;
@@ -32,6 +33,8 @@ namespace NextCgm.DContentext
         public DbSet<NginxRoutingRule> NginxRoutingRules { get; set; }
 
         public DbSet<UserContainerDatabase> UserContainerDatabases { get; set; }
+
+        public DbSet<CloudflareLogger> CloudflareLoggers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

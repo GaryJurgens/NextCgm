@@ -34,12 +34,25 @@ to build the new image
 docker-compose build nextcgm-backend
 
    docker-compose -f docker-compose.prod.yml build
+
+for local build use
+docker-compose -f docker-compose-local.yml build
+
+then copy dcoker-compose.yml to vpn root
+
+
+use 
    ```
    *(This compiles your .NET application and tags it with your Docker Hub username)*
 
 3. **Push the Image to the Cloud:**
    ```bash
-   docker-compose -f docker-compose.prod.yml push
+
+this updates the image, 
+
+   docker-compose -f docker-compose-local.yml push
+
+but you need to copy the docker-compose.yml file to the VPN, as its different, espicly regarading file and build parths and instrations
    ```
    *(This uploads your compiled application image to Docker Hub so your VPS can download it later)*
 
@@ -53,6 +66,12 @@ docker stop $(docker ps -aq)
 
 remove all containers 
 docker rm $(docker ps -aq)
+
+To see logs for the Backend:
+docker logs nextcgm-backend
+
+To see logs for the UI:
+docker logs nginx-ui
 
 
 Now, your VPS doesn't need your source code at all! It only needs the `docker-compose.prod.yml` file.

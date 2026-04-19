@@ -20,5 +20,9 @@ namespace NextCgm.DataEntities
         public int ExposedPortLeft { get; internal set; }
         public int HostPortRight { get; internal set; }
         public string DockerStatus { get; internal set; } = string.Empty;
+
+        // Comprehensive logging fields
+        public string RequestPayload { get; set; } = string.Empty;
+        public string ResponsePayload { get; set; } = string.Empty;
     }
 }

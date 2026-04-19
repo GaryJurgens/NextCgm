@@ -6,6 +6,9 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using NextCgm.DContentext;
+using NextCgm.DataEntities.Cloudflare;
+using Medo;
 
 namespace NextCgm.Services.Actions
 {
@@ -20,12 +23,14 @@ namespace NextCgm.Services.Actions
         private readonly HttpClient _httpClient;
         private readonly CloudflareOptions _options;
         private readonly ILogger<CloudflareService> _logger;
+        private readonly AppDBContext _context;
 
-        public CloudflareService(HttpClient httpClient, IOptions<CloudflareOptions> options, ILogger<CloudflareService> logger)
+        public CloudflareService(HttpClient httpClient, IOptions<CloudflareOptions> options, ILogger<CloudflareService> logger, AppDBContext context)
         {
             _httpClient = httpClient;
             _options = options.Value;
             _logger = logger;
+            _context = context;
 
             var baseUrl = string.IsNullOrEmpty(_options.ApiBaseUrl)
                 ? "https://api.cloudflare.com/client/v4/"
@@ -38,9 +43,24 @@ namespace NextCgm.Services.Actions
 
         public async Task<CreateDnsRecordResponseDTO> CreateDnsRecordAsync(CreateDnsRecordRequestDTO request)
         {
+            var cloudflareLogger = new CloudflareLogger
+            {
+                CloudflareLoggerID = Uuid7.NewUuid7(),
+                Action = "Create",
+                Subdomain = request.Subdomain ?? string.Empty,
+                RecordType = request.RecordType ?? string.Empty,
+                RequestPayload = JsonSerializer.Serialize(request),
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.CloudflareLoggers.Add(cloudflareLogger);
+
             if (string.IsNullOrEmpty(_options.ZoneId) || string.IsNullOrEmpty(_options.ApiToken))
             {
                 _logger.LogError("Cloudflare configuration is missing ZoneId or ApiToken.");
+                cloudflareLogger.IsSuccess = false;
+                cloudflareLogger.ExceptionMessage = "Cloudflare configuration is missing ZoneId or ApiToken.";
+                await _context.SaveChangesAsync();
                 return CreateDnsRecordResponseDTO.Failure("Cloudflare configuration is missing.");
             }
 
@@ -48,24 +68,34 @@ namespace NextCgm.Services.Actions
                 ? _options.Domain
                 : $"{request.Subdomain}.{_options.Domain}";
 
-            var target = request.TargetIp ?? _options.TargetIp;
+            var target = string.IsNullOrEmpty(request.TargetIp) ? _options.TargetIp : request.TargetIp;
+            if (string.IsNullOrEmpty(target))
+            {
+                target = string.IsNullOrEmpty(request.Target) ? _options.TargetIp : request.Target;
+            }
 
             if (string.IsNullOrEmpty(target))
             {
+                cloudflareLogger.IsSuccess = false;
+                cloudflareLogger.ExceptionMessage = "Target IP/Domain is required.";
+                await _context.SaveChangesAsync();
                 return CreateDnsRecordResponseDTO.Failure("Target IP/Domain is required.");
             }
 
             // Fix: Cloudflare throws 400 if you send an IP for a CNAME or a Hostname for an A record.
-            var recordType = request.RecordType.ToUpperInvariant();
+            var recordType = request.RecordType?.ToUpperInvariant() ?? "A";
+            cloudflareLogger.RecordType = recordType;
 
             var payload = new
             {
                 type = recordType,
-                name = request.Subdomain,
+                name = fullDomainName,
                 content = target,
                 proxied = request.Proxied,
                 ttl = 1 // 1 = automatic
             };
+
+            cloudflareLogger.RequestPayload = JsonSerializer.Serialize(payload);
 
             try
             {
@@ -74,11 +104,16 @@ namespace NextCgm.Services.Actions
                 var response = await _httpClient.PostAsJsonAsync($"zones/{_options.ZoneId}/dns_records", payload);
                 var responseContent = await response.Content.ReadAsStringAsync();
 
+                cloudflareLogger.ResponsePayload = responseContent;
+
                 // Deserialize the response to get structured error data
                 var result = JsonSerializer.Deserialize<CloudflareApiResponse>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                 if (response.IsSuccessStatusCode && result != null && result.Success)
                 {
+                    cloudflareLogger.IsSuccess = true;
+                    await _context.SaveChangesAsync();
+
                     _logger.LogInformation("Successfully created {Type} record: {Id}", recordType, result.Result?.Id);
                     return new CreateDnsRecordResponseDTO
                     {
@@ -93,11 +128,19 @@ namespace NextCgm.Services.Actions
                     ? string.Join(" | ", result.Errors.Select(e => $"Code {e.Code}: {e.Message}"))
                     : responseContent;
 
+                cloudflareLogger.IsSuccess = false;
+                cloudflareLogger.ExceptionMessage = errorMsg ?? "Unknown Cloudflare Error";
+                await _context.SaveChangesAsync();
+
                 _logger.LogWarning("Cloudflare API Rejected Request: {Error}", errorMsg);
                 return CreateDnsRecordResponseDTO.Failure($"Cloudflare Error: {errorMsg}");
             }
             catch (Exception ex)
             {
+                cloudflareLogger.IsSuccess = false;
+                cloudflareLogger.ExceptionMessage = ex.ToString();
+                await _context.SaveChangesAsync();
+
                 _logger.LogError(ex, "Exception occurred while creating DNS record for {Name}", fullDomainName);
                 return CreateDnsRecordResponseDTO.Failure($"Internal Error: {ex.Message}");
             }
@@ -105,13 +148,31 @@ namespace NextCgm.Services.Actions
 
         public async Task<RemoveDnsRecordResponseDTO> RemoveDnsRecordAsync(RemoveDnsRecordRequestDTO request)
         {
+            var cloudflareLogger = new CloudflareLogger
+            {
+                CloudflareLoggerID = Uuid7.NewUuid7(),
+                Action = "Delete",
+                Subdomain = "", // Not readily available in remove request, but could be fetched if needed
+                RecordType = "",
+                RequestPayload = JsonSerializer.Serialize(request),
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.CloudflareLoggers.Add(cloudflareLogger);
+
             if (string.IsNullOrEmpty(_options.ZoneId) || string.IsNullOrEmpty(_options.ApiToken))
             {
+                cloudflareLogger.IsSuccess = false;
+                cloudflareLogger.ExceptionMessage = "Cloudflare configuration is missing ZoneId or ApiToken.";
+                await _context.SaveChangesAsync();
                 return RemoveDnsRecordResponseDTO.Failure("Cloudflare configuration is missing.");
             }
 
             if (string.IsNullOrEmpty(request.RecordId))
             {
+                cloudflareLogger.IsSuccess = false;
+                cloudflareLogger.ExceptionMessage = "RecordId is required.";
+                await _context.SaveChangesAsync();
                 return RemoveDnsRecordResponseDTO.Failure("RecordId is required.");
             }
 
@@ -120,8 +181,13 @@ namespace NextCgm.Services.Actions
                 var response = await _httpClient.DeleteAsync($"zones/{_options.ZoneId}/dns_records/{request.RecordId}");
                 var responseContent = await response.Content.ReadAsStringAsync();
 
+                cloudflareLogger.ResponsePayload = responseContent;
+
                 if (response.IsSuccessStatusCode)
                 {
+                    cloudflareLogger.IsSuccess = true;
+                    await _context.SaveChangesAsync();
+
                     _logger.LogInformation("Successfully removed DNS record: {Id}", request.RecordId);
                     return new RemoveDnsRecordResponseDTO
                     {
@@ -130,11 +196,19 @@ namespace NextCgm.Services.Actions
                     };
                 }
 
+                cloudflareLogger.IsSuccess = false;
+                cloudflareLogger.ExceptionMessage = $"Failed to remove DNS record: {responseContent}";
+                await _context.SaveChangesAsync();
+
                 _logger.LogWarning("Cloudflare Failed to remove record {Id}. Response: {Content}", request.RecordId, responseContent);
                 return RemoveDnsRecordResponseDTO.Failure($"Failed to remove DNS record: {responseContent}");
             }
             catch (Exception ex)
             {
+                cloudflareLogger.IsSuccess = false;
+                cloudflareLogger.ExceptionMessage = ex.ToString();
+                await _context.SaveChangesAsync();
+
                 _logger.LogError(ex, "Exception occurred while removing DNS record {Id}", request.RecordId);
                 return RemoveDnsRecordResponseDTO.Failure($"Error removing DNS record: {ex.Message}");
             }

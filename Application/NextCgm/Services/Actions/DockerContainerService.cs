@@ -92,16 +92,6 @@ namespace NextCgm.Services.Actions
 
                 int ExposedPort = await GeneratePortInRange(10000, 20000);
 
-                await _context.DockerLogger.AddAsync(new DockerLogger
-                {
-                    DockerLoggerID = Uuid7.NewUuid7(),
-                    LogMessage = $"Attempting to create container with image: {_options.ImageName}:{_options.Tag} on exposed port: {ExposedPort}",
-                    FriendlyContanierName = SubDomainGen + _options.EndDomain,
-                    ContainerStatus = DockerContainerStatus.Creating.ToString(),
-                    CreatedAt = DateTime.UtcNow
-                });
-                await _context.SaveChangesAsync();
-
                 var hostConfig = new HostConfig
                 {
                     RestartPolicy = new RestartPolicy { Name = RestartPolicyKind.Always }
@@ -120,7 +110,7 @@ namespace NextCgm.Services.Actions
                     hostConfig.NetworkMode = _options.DockerNetworkName;
                 }
 
-                var response = await client.Containers.CreateContainerAsync(new CreateContainerParameters
+                var createParams = new CreateContainerParameters
                 {
                     Image = _options.ImageName,
                     Name = SubDomainGen,
@@ -130,7 +120,20 @@ namespace NextCgm.Services.Actions
                         { _options.ContainerPort.ToString() + "/tcp", default(EmptyStruct) }
                     },
                     HostConfig = hostConfig
+                };
+
+                await _context.DockerLogger.AddAsync(new DockerLogger
+                {
+                    DockerLoggerID = Uuid7.NewUuid7(),
+                    LogMessage = $"Attempting to create container with image: {_options.ImageName}:{_options.Tag} on exposed port: {ExposedPort}",
+                    FriendlyContanierName = SubDomainGen + _options.EndDomain,
+                    ContainerStatus = DockerContainerStatus.Creating.ToString(),
+                    RequestPayload = System.Text.Json.JsonSerializer.Serialize(createParams),
+                    CreatedAt = DateTime.UtcNow
                 });
+                await _context.SaveChangesAsync();
+
+                var response = await client.Containers.CreateContainerAsync(createParams);
 
                 // 4. Try to inspect the container to see if it exists
                 var containerId = response.ID;
@@ -159,6 +162,7 @@ namespace NextCgm.Services.Actions
                     LogMessage = $"Container created with ID: {response.ID}, Status: {DockerContainerStatus.Created} || but not started yet.",
                     FriendlyContanierName = SubDomainGen + _options.EndDomain,
                     ContainerStatus = DockerContainerStatus.Created.ToString(),
+                    ResponsePayload = System.Text.Json.JsonSerializer.Serialize(response),
                     CreatedAt = DateTime.UtcNow
                 });
                 await _context.SaveChangesAsync();
@@ -285,9 +289,7 @@ namespace NextCgm.Services.Actions
                     {
                         Subdomain = SubDomainGen,
                         RecordType = "A",
-                        Target = _options.TargetIp,
-                        Proxied = true,
-                        TargetIp = _options.TargetIp,
+                        Proxied = true
                     };
                     var dnsResponse = await _cloudflareService.CreateDnsRecordAsync(dnsRequest);
                     
