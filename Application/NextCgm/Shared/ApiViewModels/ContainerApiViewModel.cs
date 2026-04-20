@@ -4,6 +4,7 @@ namespace NextCgm.Shared.ApiViewModels
 {
     public class ContainerApiViewModel
     {
+        public Guid DockerContainersID { get; set; }
         public Guid UserEntityID { get; set; }
         public UserEntity? UserEntity { get; set; }
 

@@ -274,6 +274,7 @@ namespace NextCgm.Services.Actions
                         Message = "Container created and verified as running.",
                         Payload = new Shared.ApiViewModels.ContainerApiViewModel
                         {
+                            DockerContainersID = newContainerRecord.DockerContainersID,
                             InstanceID = containerId,
                             FriendlyContainerURL = SubDomainGen + _options.EndDomain,
                             ImageNameInUse = _options.ImageName,
@@ -468,6 +469,7 @@ namespace NextCgm.Services.Actions
 
                 var payload = containers.Select(c => new Shared.ApiViewModels.ContainerApiViewModel
                 {
+                    DockerContainersID = c.DockerContainersID,
                     InstanceID = c.InstanceID,
                     FriendlyContainerURL = c.AppUniqueName + _options.EndDomain,
                     ImageNameInUse = c.ImageNameInUse,
@@ -507,15 +509,18 @@ namespace NextCgm.Services.Actions
                 try
                 {
                     // Remove the container using Docker API
-                    await client.Containers.RemoveContainerAsync(containerRecord.InstanceID, new ContainerRemoveParameters
+                    if (!string.IsNullOrEmpty(containerRecord.InstanceID))
                     {
-                        Force = true,
-                        RemoveVolumes = true
-                    });
+                        await client.Containers.RemoveContainerAsync(containerRecord.InstanceID, new ContainerRemoveParameters
+                        {
+                            Force = true,
+                            RemoveVolumes = true
+                        });
+                    }
                 }
-                catch (DockerContainerNotFoundException)
+                catch (Exception)
                 {
-                    // Container already removed from docker host, continue to clean up DB
+                    // Container already removed from docker host or docker API failed, continue to clean up DB
                 }
 
                 containerRecord.DockerStatus = DockerContainerStatus.Deleted.ToString();
