@@ -14,11 +14,4 @@
         public List<string> EnvironmentVariables { get; set; } = new List<string>();
         public string TargetIp { get; set; } = String.Empty;
     }
-
-    public class NginxProxyManagerOptions
-    {
-        public string ApiBaseUrl { get; set; } = "http://nginx-proxy-manager:81/api";
-        public string Email { get; set; } = "admin@example.com";
-        public string Password { get; set; } = "changeme";
-    }
 }

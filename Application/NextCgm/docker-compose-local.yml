@@ -1,18 +1,30 @@
 services:
-  # --- Nginx Proxy Manager ---
-  app:
-    image: 'jc21/nginx-proxy-manager:latest'
-    container_name: nginx-proxy-manager
+  # --- Traefik Reverse Proxy ---
+  traefik:
+    image: traefik:v3.0
+    container_name: traefik
     restart: unless-stopped
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
     ports:
-      - '80:80'              # Public HTTP
-      - '443:443'            # Public HTTPS
-      - '81:81'              # Admin Web UI
-    environment:
-      - TZ=Africa/Johannesburg # Matches your VPS location
+      - "80:80"
+      - "8081:8080" # Traefik dashboard
     volumes:
-      - ./data:/data
-      - ./letsencrypt:/etc/letsencrypt
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - nextcgm_network
+
+  # --- Cloudflare Tunnel ---
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    restart: unless-stopped
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=YOUR_TUNNEL_TOKEN
     networks:
       - nextcgm_network
 
@@ -24,20 +36,24 @@ services:
     image: gary450450/nextcgm-backend:latest
     container_name: nextcgm-backend
     user: root
-    # Port 8080 remains exposed for direct IP testing, 
-    # but Nginx will talk to it internally.
+    # Port 5000 remains exposed for direct IP testing, 
+    # but Traefik will talk to it internally.
     ports:
-      - "8080:8080"
+      - "5000:5000"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:8080
+      - ASPNETCORE_URLS=http://+:5000
       - DockerSettings__IsLocalDevelopment=false
       - DockerSettings__DockerNetworkName=nextcgm_network
     restart: always
     networks:
       - nextcgm_network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`api.localhost`)" # Use api.localhost for local testing
+      - "traefik.http.services.backend.loadbalancer.server.port=5000"
 
 networks:
   nextcgm_network:

@@ -299,40 +299,6 @@ namespace NextCgm.Shared.DTOS
         }
     }
 
-    public class CreateNginxMappingRequestDTO
-    {
-        public bool Success { get; set; }
-        public string Message { get; set; } = string.Empty;
-        public NginxApiViewModel? Payload { get; set; }
-
-        public static CreateNginxMappingRequestDTO Failure(string msg)
-        {
-            return new CreateNginxMappingRequestDTO
-            {
-                Success = false,
-                Message = msg,
-                Payload = null
-            };
-        }
-    }
-
-    public class CreateNginxMappingResponseDTO
-    {
-        public bool Success { get; set; }
-        public string Message { get; set; } = string.Empty;
-        public NginxApiViewModel? Payload { get; set; }
-
-        public static CreateNginxMappingResponseDTO Failure(string msg)
-        {
-            return new CreateNginxMappingResponseDTO
-            {
-                Success = false,
-                Message = msg,
-                Payload = null
-            };
-        }
-    }
-
     public class CreateDocumentDbRequestDTO
     {
         public bool Success { get; set; }
@@ -385,52 +351,6 @@ namespace NextCgm.Shared.DTOS
                 Success = false,
                 Message = msg,
                 Payload = null
-            };
-        }
-    }
-
-    public class CreateDnsRecordRequestDTO
-    {
-        public string Subdomain { get; set; } = string.Empty;
-        public string RecordType { get; set; } = "CNAME"; // "A" or "CNAME"
-        public string? Target { get; set; } // If null, uses TargetIp from config for A records
-        public bool Proxied { get; set; } = true;
-
-        public string TargetIp { get; set; } = string.Empty; // This is used if Target is null and RecordType is "A". It can be set from the configuration or passed in the request.
-    }
-
-    public class CreateDnsRecordResponseDTO
-    {
-        public bool Success { get; set; }
-        public string Message { get; set; } = string.Empty;
-        public string RecordId { get; set; } = string.Empty;
-
-        public static CreateDnsRecordResponseDTO Failure(string msg)
-        {
-            return new CreateDnsRecordResponseDTO
-            {
-                Success = false,
-                Message = msg
-            };
-        }
-    }
-
-    public class RemoveDnsRecordRequestDTO
-    {
-        public string RecordId { get; set; } = string.Empty;
-    }
-
-    public class RemoveDnsRecordResponseDTO
-    {
-        public bool Success { get; set; }
-        public string Message { get; set; } = string.Empty;
-
-        public static RemoveDnsRecordResponseDTO Failure(string msg)
-        {
-            return new RemoveDnsRecordResponseDTO
-            {
-                Success = false,
-                Message = msg
             };
         }
     }

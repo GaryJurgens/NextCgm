@@ -56,18 +56,9 @@ Console.WriteLine($"Naming System Initialized with {NameGenerator.AdjectiveCount
 builder.Services.Configure<DockerOptions>(
     builder.Configuration.GetSection("DockerSettings")); // gets the docker image name and tag from appsettings.json
 
-builder.Services.Configure<NginxProxyManagerOptions>(
-    builder.Configuration.GetSection("NginxProxyManagerOptions"));
-
 builder.Services.Configure<DocumentDbOptions>(
     builder.Configuration.GetSection("DocumentDbSettings"));
 
-builder.Services.Configure<CloudflareOptions>(
-    builder.Configuration.GetSection("CloudflareSettings"));
-
-builder.Services.AddHttpClient<ICloudflareService, CloudflareService>();
-
-builder.Services.AddScoped<INginxService,NginxService>();
 builder.Services.AddScoped<IDockerContainerService,DockerContainerService>();
 builder.Services.AddScoped<IDocumentDbService,DocumentDbService>();
 builder.Services.AddScoped<IUserService,UserService>();

@@ -24,17 +24,13 @@ namespace NextCgm.Services.Actions
 
         private readonly string SubDomainGen = Helpers.SubDomainGenerator.NameGenerator.GetAdjNatio();
         private readonly DockerOptions _options;
-        private readonly INginxService _nginxService;
         private readonly IDocumentDbService _documentDbService;
-        private readonly ICloudflareService _cloudflareService;
 
-        public DockerContainerService(AppDBContext context, IOptions<DockerOptions> options, INginxService nginxService, IDocumentDbService documentDbService, ICloudflareService cloudflareService)
+        public DockerContainerService(AppDBContext context, IOptions<DockerOptions> options, IDocumentDbService documentDbService)
         {
             _context = context;
             _options = options.Value;
-            _nginxService = nginxService;
             _documentDbService = documentDbService;
-            _cloudflareService = cloudflareService;
         }
 
         public async Task<CreateContainerResponseDTO> CreateDockerContainer(Guid userId)
@@ -119,7 +115,13 @@ namespace NextCgm.Services.Actions
                     {
                         { _options.ContainerPort.ToString() + "/tcp", default(EmptyStruct) }
                     },
-                    HostConfig = hostConfig
+                    HostConfig = hostConfig,
+                    Labels = new Dictionary<string, string>
+                    {
+                        { "traefik.enable", "true" },
+                        { $"traefik.http.routers.{SubDomainGen}.rule", $"Host(`{SubDomainGen}{_options.EndDomain}`)" },
+                        { $"traefik.http.services.{SubDomainGen}.loadbalancer.server.port", _options.ContainerPort.ToString() }
+                    }
                 };
 
                 await _context.DockerLogger.AddAsync(new DockerLogger
@@ -252,26 +254,6 @@ namespace NextCgm.Services.Actions
                         DockerStatus = finalStatus
                     }); await _context.SaveChangesAsync();
 
-                    // Create Nginx Mapping
-                    var nginxRequest = new CreateNginxMappingRequestDTO
-                    {
-                        Success = true,
-                        Message = "Requesting Nginx Mapping",
-                        Payload = new Shared.ApiViewModels.NginxApiViewModel
-                        {
-                            DockerContainerID = newContainerRecord.DockerContainersID,
-                            Hostname = SubDomainGen + _options.EndDomain,
-                            PathPrefix = "/",
-                            ExternalPort = 80, // Default HTTP port
-                            InternalAddress = _options.IsLocalDevelopment ? "host.docker.internal" : SubDomainGen, // Route via host locally, or via Docker DNS in production
-                            InternalPort = _options.IsLocalDevelopment ? ExposedPort : _options.ContainerPort, // Use the host port locally, or the internal port in production
-                            EnableWebSockets = true,
-                            ClientMaxBodySizeMb = 10,
-                            SslCertName = ""
-                        }
-                    };
-                    await _nginxService.CreateNginxMappingAsync(nginxRequest);
-
                     // Create Document DB Database
                     var dbRequest = new CreateDocumentDbRequestDTO
                     {
@@ -283,21 +265,6 @@ namespace NextCgm.Services.Actions
                         }
                     };
                     await _documentDbService.CreateDatabaseAsync(dbRequest);
-
-                    // Create Cloudflare DNS Record
-                    var dnsRequest = new CreateDnsRecordRequestDTO
-                    {
-                        Subdomain = SubDomainGen,
-                        RecordType = "A",
-                        Proxied = true
-                    };
-                    var dnsResponse = await _cloudflareService.CreateDnsRecordAsync(dnsRequest);
-                    
-                    if (dnsResponse.Success)
-                    {
-                        newContainerRecord.CloudflareRecordId = dnsResponse.RecordId;
-                        await _context.SaveChangesAsync();
-                    }
 
                     return new CreateContainerResponseDTO
                     {
