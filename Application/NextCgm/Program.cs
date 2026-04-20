@@ -56,8 +56,8 @@ Console.WriteLine($"Naming System Initialized with {NameGenerator.AdjectiveCount
 builder.Services.Configure<DockerOptions>(
     builder.Configuration.GetSection("DockerSettings")); // gets the docker image name and tag from appsettings.json
 
-builder.Services.Configure<NginxUnitOptions>(
-    builder.Configuration.GetSection("NginxUnitOptions"));
+builder.Services.Configure<NginxProxyManagerOptions>(
+    builder.Configuration.GetSection("NginxProxyManagerOptions"));
 
 builder.Services.Configure<DocumentDbOptions>(
     builder.Configuration.GetSection("DocumentDbSettings"));

@@ -15,21 +15,10 @@
         public string TargetIp { get; set; } = String.Empty;
     }
 
-    public class NginxUnitOptions
+    public class NginxProxyManagerOptions
     {
-        public string ApiBaseUrl { get; set; }
-        public string DefaultAppRoot { get; set; }
-
-        public string CertificatePath { get; set; }
-
-        public string KeyPath { get; set; }
-
-        public string ConfigDirectory { get; set; } = "/app/nginx_conf";
-        public string NginxContainerName { get; set; } = "nginx-ui";
-
-        public string NginxUiApiUrl { get; set; } = "http://host.docker.internal:80";
-        public string NginxUiApiToken { get; set; } = string.Empty;
-
-        // This comes from AppConfig
+        public string ApiBaseUrl { get; set; } = "http://nginx-proxy-manager:81/api";
+        public string Email { get; set; } = "admin@example.com";
+        public string Password { get; set; } = "changeme";
     }
 }

@@ -27,7 +27,7 @@
       "httpPort": 32771,
       "publishAllPorts": false,
       "useSSL": false,
-      "DockerfileRunArguments": "-v /var/run/docker.sock:/var/run/docker.sock -v C:/Docker/nginx-ui:/app/nginx_data -u root"
+      "DockerfileRunArguments": "-v /var/run/docker.sock:/var/run/docker.sock -u root"
     }
   },
     "$schema": "https://json.schemastore.org/launchsettings.json"

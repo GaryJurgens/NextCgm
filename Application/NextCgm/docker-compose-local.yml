@@ -30,8 +30,6 @@ services:
       - "8080:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./nginx_data/nginx:/app/nginx_data/nginx
-      - ./nginx_data/nginx-ui:/app/nginx_data/nginx-ui
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8080
