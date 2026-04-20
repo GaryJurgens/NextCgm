@@ -355,6 +355,26 @@ namespace NextCgm.Shared.DTOS
         }
     }
 
+    public class DeleteContainerRequestDTO
+    {
+        public Guid DockerContainersID { get; set; }
+    }
+
+    public class DeleteContainerResponseDTO
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; } = string.Empty;
+
+        public static DeleteContainerResponseDTO Failure(string msg)
+        {
+            return new DeleteContainerResponseDTO
+            {
+                Success = false,
+                Message = msg
+            };
+        }
+    }
+
     public class CountryDTO
     {
         public Guid CountryListID { get; set; }

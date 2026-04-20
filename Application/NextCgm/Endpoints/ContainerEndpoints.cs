@@ -94,4 +94,93 @@ namespace NextCgm.Endpoints
             }
         }
     }
+
+    public class DeleteContainerEndpoint : Endpoint<DeleteContainerRequestDTO, DeleteContainerResponseDTO>
+    {
+        private readonly IDockerContainerService _dockerContainerService;
+
+        public DeleteContainerEndpoint(IDockerContainerService dockerContainerService)
+        {
+            _dockerContainerService = dockerContainerService;
+        }
+
+        public override void Configure()
+        {
+            Post("/api/Containers/DeleteContainer");
+            // Require authentication
+            Summary(s =>
+            {
+                s.Summary = "Delete an existing container";
+                s.Description = "Deletes a Docker container for the user.";
+            });
+        }
+
+        public override async Task HandleAsync(DeleteContainerRequestDTO req, CancellationToken ct)
+        {
+            try
+            {
+                var response = await _dockerContainerService.DeleteDockerContainer(req);
+                if (response.Success)
+                {
+                    await Send.OkAsync(response, ct);
+                }
+                else
+                {
+                    await Send.StatusCodeAsync(400, ct);
+                }
+            }
+            catch (Exception ex)
+            {
+                ThrowError(ex.Message, 400);
+            }
+        }
+    }
+
+    public class GetAllContainersByUserEndpoint : EndpointWithoutRequest<GetAllContainersResponseDTO>
+    {
+        private readonly IDockerContainerService _dockerContainerService;
+
+        public GetAllContainersByUserEndpoint(IDockerContainerService dockerContainerService)
+        {
+            _dockerContainerService = dockerContainerService;
+        }
+
+        public override void Configure()
+        {
+            Get("/api/Containers/GetAllContainersByUser");
+            // Require authentication
+            Summary(s =>
+            {
+                s.Summary = "Get all containers for a user";
+                s.Description = "Retrieves all Docker containers for the authenticated user.";
+            });
+        }
+
+        public override async Task HandleAsync(CancellationToken ct)
+        {
+            try
+            {
+                var userIdClaim = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+                if (!Guid.TryParse(userIdClaim, out var userId))
+                {
+                    ThrowError("User ID not found", 400);
+                    return;
+                }
+
+                var response = await _dockerContainerService.GetAllContainersByUser(userId);
+                if (response.Success)
+                {
+                    await Send.OkAsync(response, ct);
+                }
+                else
+                {
+                    await Send.StatusCodeAsync(400, ct);
+                }
+            }
+            catch (Exception ex)
+            {
+                ThrowError(ex.Message, 400);
+            }
+        }
+    }
 }

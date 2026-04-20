@@ -16,6 +16,8 @@ namespace NextCgm.Services.Actions
         public Task<int> GeneratePortInRange(int startPort, int endPort);
         Task<CreateContainerResponseDTO> CreateDockerContainer(Guid userId);
         Task<StopContainerResponseDTO> StopDockerContainer(StopContainerRequestDTO request);
+        Task<DeleteContainerResponseDTO> DeleteDockerContainer(DeleteContainerRequestDTO request);
+        Task<GetAllContainersResponseDTO> GetAllContainersByUser(Guid userId);
     }
 
     public class DockerContainerService : IDockerContainerService
@@ -454,6 +456,96 @@ namespace NextCgm.Services.Actions
             catch (Exception ex)
             {
                 return StopContainerResponseDTO.Failure($"An error occurred: {ex.Message}");
+            }
+        }
+        public async Task<GetAllContainersResponseDTO> GetAllContainersByUser(Guid userId)
+        {
+            try
+            {
+                var containers = _context.DockerContainers
+                    .Where(c => c.UserEntityID == userId && c.DockerStatus != DockerContainerStatus.Deleted.ToString())
+                    .ToList();
+
+                var payload = containers.Select(c => new Shared.ApiViewModels.ContainerApiViewModel
+                {
+                    InstanceID = c.InstanceID,
+                    FriendlyContainerURL = c.AppUniqueName + _options.EndDomain,
+                    ImageNameInUse = c.ImageNameInUse,
+                    ExposedPortLeft = c.ExposedPortLeft,
+                    HostPortRight = c.HostPortRight,
+                    DockerStatus = c.DockerStatus
+                }).ToList();
+
+                return new GetAllContainersResponseDTO
+                {
+                    Success = true,
+                    Message = "Containers retrieved successfully.",
+                    Payload = payload
+                };
+            }
+            catch (Exception ex)
+            {
+                return GetAllContainersResponseDTO.Failure($"Error retrieving containers: {ex.Message}");
+            }
+        }
+
+        public async Task<DeleteContainerResponseDTO> DeleteDockerContainer(DeleteContainerRequestDTO request)
+        {
+            try
+            {
+                var containerRecord = await _context.DockerContainers.FindAsync(request.DockerContainersID);
+                if (containerRecord == null)
+                {
+                    return DeleteContainerResponseDTO.Failure("Container record not found in the database.");
+                }
+
+                var dockerUri = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows)
+                    ? new Uri("npipe://./pipe/docker_engine")
+                    : new Uri("unix:///var/run/docker.sock");
+                var client = new DockerClientConfiguration(dockerUri).CreateClient();
+
+                try
+                {
+                    // Remove the container using Docker API
+                    await client.Containers.RemoveContainerAsync(containerRecord.InstanceID, new ContainerRemoveParameters
+                    {
+                        Force = true,
+                        RemoveVolumes = true
+                    });
+                }
+                catch (DockerContainerNotFoundException)
+                {
+                    // Container already removed from docker host, continue to clean up DB
+                }
+
+                containerRecord.DockerStatus = DockerContainerStatus.Deleted.ToString();
+                containerRecord.RemovedAt = DateTime.UtcNow;
+
+                await _context.DockerLogger.AddAsync(new DockerLogger
+                {
+                    DockerLoggerID = Uuid7.NewUuid7(),
+                    LogMessage = $"Container deleted successfully.",
+                    FriendlyContanierName = containerRecord.AppUniqueName,
+                    ContainerStatus = DockerContainerStatus.Deleted.ToString(),
+                    DockerInstanceID = containerRecord.InstanceID,
+                    CreatedAt = DateTime.UtcNow
+                });
+
+                await _context.SaveChangesAsync();
+
+                return new DeleteContainerResponseDTO
+                {
+                    Success = true,
+                    Message = "Container deleted successfully."
+                };
+            }
+            catch (DockerApiException ex)
+            {
+                return DeleteContainerResponseDTO.Failure($"Docker API Error: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                return DeleteContainerResponseDTO.Failure($"An error occurred: {ex.Message}");
             }
         }
     }

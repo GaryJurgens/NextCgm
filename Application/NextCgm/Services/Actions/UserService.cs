@@ -24,12 +24,14 @@ namespace NextCgm.Services.Actions
         private readonly AppDBContext _context;
         private readonly IJwtTokenGenerator _jwtTokenGenerator;
         private readonly IEmailService _emailService;
+        private readonly DockerOptions _dockerOptions;
 
-        public UserService(AppDBContext context, IJwtTokenGenerator jwtTokenGenerator, IEmailService emailService)
+        public UserService(AppDBContext context, IJwtTokenGenerator jwtTokenGenerator, IEmailService emailService, Microsoft.Extensions.Options.IOptions<DockerOptions> dockerOptions)
         {
             _context = context;
             _jwtTokenGenerator = jwtTokenGenerator;
             _emailService = emailService;
+            _dockerOptions = dockerOptions.Value;
         }
 
         public async Task<LoginResponseDTO> LoginAsync(LoginRequestDTO request)
@@ -137,7 +139,7 @@ namespace NextCgm.Services.Actions
                 {
                     FirstName = newUser.FirstName,
                     LastName = newUser.LastName,
-                    UserSubDomain = $"{newUser.UserSubDomain}.nextcgm.com",
+                    UserSubDomain = $"{newUser.UserSubDomain}{_dockerOptions.EndDomain}",
                     ApiKeyForNightScout = newUser.ApiKeyForNightScout,
                     DockerStatus = newUser.DockerStatus.ToString()
                 };
@@ -215,7 +217,9 @@ namespace NextCgm.Services.Actions
 
         public async Task<VerifyOtpResponseDTO> VerifyOtpAsync(VerifyOtpRequestDTO request)
         {
-            var user = await _context.UserEntities.FirstOrDefaultAsync(u => u.EmailUsername == request.EmailUsername);
+            var user = await _context.UserEntities
+                .Include(u => u.DockerContainers)
+                .FirstOrDefaultAsync(u => u.EmailUsername == request.EmailUsername);
             if (user == null)
             {
                 return VerifyOtpResponseDTO.Failure("Invalid request");
@@ -243,9 +247,20 @@ namespace NextCgm.Services.Actions
             {
                 FirstName = user.FirstName,
                 LastName = user.LastName,
-                UserSubDomain = $"{user.UserSubDomain}.nextcgm.com",
+                UserSubDomain = $"{user.UserSubDomain}{_dockerOptions.EndDomain}",
                 ApiKeyForNightScout = user.ApiKeyForNightScout,
-                DockerStatus = user.DockerStatus.ToString()
+                DockerStatus = user.DockerStatus.ToString(),
+                DockerContainers = user.DockerContainers
+                    .Where(c => c.DockerStatus != DockerContainerStatus.Deleted.ToString())
+                    .Select(c => new ContainerApiViewModel
+                    {
+                        InstanceID = c.InstanceID,
+                        FriendlyContainerURL = c.AppUniqueName + _dockerOptions.EndDomain,
+                        ImageNameInUse = c.ImageNameInUse,
+                        ExposedPortLeft = c.ExposedPortLeft,
+                        HostPortRight = c.HostPortRight,
+                        DockerStatus = c.DockerStatus
+                    }).ToList()
             };
 
             return new VerifyOtpResponseDTO

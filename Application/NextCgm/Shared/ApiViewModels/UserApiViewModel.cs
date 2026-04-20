@@ -42,7 +42,7 @@ namespace NextCgm.Shared.ApiViewModels
 
         public Guid TimeZoneID { get; set; }
 
-        public ICollection<DockerContainerStatus> DockerContainers { get; set; } = new List<DockerContainerStatus>();
+        public ICollection<ContainerApiViewModel> DockerContainers { get; set; } = new List<ContainerApiViewModel>();
 
         public string DockerStatus { get; set; }
     }

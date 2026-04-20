@@ -14,5 +14,6 @@
         TimeOutError,
         Error,
         Creating,
+        Deleted
     }
 }

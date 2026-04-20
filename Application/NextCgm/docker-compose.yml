@@ -1,21 +1,26 @@
 services:
   # --- Traefik Reverse Proxy ---
   traefik:
-    image: traefik:v3.0
+    image: traefik:latest
     container_name: traefik
     restart: unless-stopped
     command:
-      - "--api.insecure=true"
+      - "--api.dashboard=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
     ports:
       - "80:80"
-      - "8081:8080" # Traefik dashboard
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
       - nextcgm_network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.nextcgm.co.za`)"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.middlewares=auth"
+      - "traefik.http.middlewares.auth.basicauth.users=Admin:$$2y$$05$$azPZO1LbEawB.vOyiguU5.yRSfFHFQNoLuiYENqltSr95yw5F7S42" # Admin:r669zXtMmJC*n16
 
   # --- Cloudflare Tunnel ---
   cloudflared:
@@ -24,7 +29,7 @@ services:
     restart: unless-stopped
     command: tunnel run
     environment:
-      - TUNNEL_TOKEN=YOUR_TUNNEL_TOKEN
+      - TUNNEL_TOKEN=eyJhIjoiOTExZDkyOWM0MjAzZTc2OTE3NTgzZjdjMGJiMTlhN2YiLCJ0IjoiMzdiMjk2ZWQtOTlhZi00MDI2LWJmOGEtZGUxODdiNDA2Y2RkIiwicyI6Ik56azRZMkl5WmpBdE0yUXdaaTAwTkRNd0xXRXdZemt0WWpKaFpESmtNekUzWlRFeSJ9
     networks:
       - nextcgm_network
 
