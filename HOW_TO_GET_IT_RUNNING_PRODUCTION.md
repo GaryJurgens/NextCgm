@@ -4,7 +4,33 @@ This guide explains how to publish your NextCgm application to a Docker registry
 
 By publishing your application as a Docker image, you avoid having to copy your entire source code repository to your production server. The VPS only needs the `docker-compose.prod.yml` file to pull your pre-built image and spin everything up.
 
+
+
 ---
+
+install docker commands
+
+# Update your package list
+sudo apt-get update
+
+# Install required certificates and tools
+sudo apt-get install -y ca-certificates curl gnupg
+
+# Add Docker's official GPG key
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+# Add the repository to Apt sources
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# Install Docker and the Compose plugin
+sudo apt-get update
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
 
 ## Step 1: Create a Docker Hub Account
 If you don't already have one, go to [hub.docker.com](https://hub.docker.com/) and create a free account. Make sure to note your **username**.
@@ -51,6 +77,9 @@ use
 this updates the image, 
 
    docker-compose -f docker-compose-local.yml push
+
+docker-compose -f docker-compose-local.yml push
+
 
 but you need to copy the docker-compose.yml file to the VPN, as its different, espicly regarading file and build parths and instrations
    ```
@@ -122,6 +151,20 @@ docker-compose pull
 docker-compose up -d
 
 
+pull only single Docker image, without restarting
+
+1. Force the Pull
+Instead of a general pull, use the --pull always flag directly on the up command. This forces Docker to check the registry for a new digest regardless of what’s local.
+
+docker compose up -d --pull always --no-deps nextcgm-backend
+
+Force Recreate (The "Just in Case" Move)
+If Docker still thinks the current container is "up to date" with the local image, you can force it to kill the old one and build a fresh one from the image:
+
+docker compose up -d --force-recreate --no-deps nextcgm-backend
+
+
+
 if containers are stuck, ie container error
 
  docker rm -f nextcgm-backend nginx-ui nextcgm-backend or just // docker rm -f nextcgm-backend nginx-ui
@@ -176,6 +219,10 @@ proxy_set_header X-Real-IP $remote_addr;
 proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 proxy_set_header X-Forwarded-Proto $scheme;
 
+
+DNS Token
+
+cfut_XcrPJJYLkdxlceCnmm1GGSJsD9kaX3ROtbQCE9Epdfea6514
 
 ## ⚠️ Important Production Notes
 - **Docker Socket Security:** Mounting `/var/run/docker.sock` gives the container full control over the host's Docker daemon. Ensure your VPS is properly secured and only accessible via SSH keys.

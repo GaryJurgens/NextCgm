@@ -64,8 +64,9 @@
 
         public static string GetApiKey()
         {
-            // A singular word and a number
-            return $"{Pick(_nato)}{_rng.Next(100, 9999)}".ToLower();
+            // Nightscout requires API_SECRET to be AT LEAST 12 characters long!
+            // Using two words and a 5-digit number ensures it's always >= 12 chars.
+            return $"{Pick(_nato)}{Pick(_colors)}{_rng.Next(10000, 99999)}".ToLower();
         }
 
         private static string Pick(string[] words)

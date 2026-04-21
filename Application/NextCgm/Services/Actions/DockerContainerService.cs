@@ -49,18 +49,64 @@ namespace NextCgm.Services.Actions
                     };
                 }
 
+                // Find the base Mongo connection string from Docker options
+                string baseMongoConnectionString = string.Empty;
+                foreach (var env in _options.EnvironmentVariables)
+                {
+                    if (env.StartsWith("MONGO_CONNECTION="))
+                    {
+                        baseMongoConnectionString = env.Substring("MONGO_CONNECTION=".Length);
+                        break;
+                    }
+                }
+
+                // Create Document DB Database first so we can inject the connection string
+                var dbRequest = new CreateDocumentDbRequestDTO
+                {
+                    Success = true,
+                    Message = "Requesting Document DB Creation",
+                    Payload = new Shared.ApiViewModels.DocumentDbApiViewModel
+                    {
+                        DatabaseName = SubDomainGen,
+                        ConnectionString = baseMongoConnectionString
+                    }
+                };
+                var dbResponse = await _documentDbService.CreateDatabaseAsync(dbRequest);
+                
+                if (!dbResponse.Success)
+                {
+                    return new CreateContainerResponseDTO
+                    {
+                        Success = false,
+                        Message = $"Failed to create Document DB: {dbResponse.Message}",
+                    };
+                }
+
+                string newMongoConnectionString = dbResponse.Payload?.ConnectionString ?? string.Empty;
+
                 // Prepare environment variables, replacing any placeholder API_SECRET with the user's actual API key
                 var envVars = new List<string>();
+                bool mongoConnectionSet = false;
                 foreach (var env in _options.EnvironmentVariables)
                 {
                     if (env.StartsWith("API_SECRET="))
                     {
                         envVars.Add($"API_SECRET={user.ApiKeyForNightScout}");
                     }
+                    else if (env.StartsWith("MONGO_CONNECTION=") && !string.IsNullOrEmpty(newMongoConnectionString))
+                    {
+                        envVars.Add($"MONGO_CONNECTION={newMongoConnectionString}");
+                        mongoConnectionSet = true;
+                    }
                     else
                     {
                         envVars.Add(env);
                     }
+                }
+
+                if (!mongoConnectionSet && !string.IsNullOrEmpty(newMongoConnectionString))
+                {
+                    envVars.Add($"MONGO_CONNECTION={newMongoConnectionString}");
                 }
 
                 // 1. Initialize the client (Standard for Windows/Linux)
@@ -255,18 +301,6 @@ namespace NextCgm.Services.Actions
                         HostPortRight = _options.ContainerPort,
                         DockerStatus = finalStatus
                     }); await _context.SaveChangesAsync();
-
-                    // Create Document DB Database
-                    var dbRequest = new CreateDocumentDbRequestDTO
-                    {
-                        Success = true,
-                        Message = "Requesting Document DB Creation",
-                        Payload = new Shared.ApiViewModels.DocumentDbApiViewModel
-                        {
-                            DatabaseName = SubDomainGen
-                        }
-                    };
-                    await _documentDbService.CreateDatabaseAsync(dbRequest);
 
                     return new CreateContainerResponseDTO
                     {

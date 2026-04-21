@@ -40,11 +40,13 @@ namespace NextCgm.Endpoints
                 var response = await _dockerContainerService.CreateDockerContainer(userId);
                 if (response.Success)
                 {
-                    await Send.OkAsync(response,  ct);
+                    HttpContext.Response.StatusCode = 200;
+                    await HttpContext.Response.WriteAsJsonAsync(response, ct);
                 }
                 else
                 {
-                    await Send.StatusCodeAsync(400,  ct);
+                    HttpContext.Response.StatusCode = 400;
+                    await HttpContext.Response.WriteAsJsonAsync(response, ct);
                 }
             }
             catch (Exception ex)

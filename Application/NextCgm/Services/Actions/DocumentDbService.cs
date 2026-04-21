@@ -36,29 +36,17 @@ namespace NextCgm.Services.Actions
 
                 var databaseName = request.Payload.DatabaseName;
                 
-                string baseConnectionString = _options.ConnectionString;
-                string finalConnectionString = baseConnectionString;
+                string baseConnectionString = !string.IsNullOrEmpty(request.Payload.ConnectionString) 
+                    ? request.Payload.ConnectionString 
+                    : _options.ConnectionString;
                 
-                if (baseConnectionString.Contains("?"))
-                {
-                    var parts = baseConnectionString.Split('?', 2);
-                    if (!parts[0].EndsWith("/"))
-                    {
-                        parts[0] += "/";
-                    }
-                    finalConnectionString = $"{parts[0]}{databaseName}?{parts[1]}";
-                }
-                else
-                {
-                    if (!baseConnectionString.EndsWith("/"))
-                    {
-                        baseConnectionString += "/";
-                    }
-                    finalConnectionString = $"{baseConnectionString}{databaseName}";
-                }
+                // Use MongoUrlBuilder to safely replace or add the database name
+                var mongoUrlBuilder = new MongoUrlBuilder(baseConnectionString);
+                mongoUrlBuilder.DatabaseName = databaseName;
+                string finalConnectionString = mongoUrlBuilder.ToString();
 
                 // Connect to MongoDB
-                var client = new MongoClient(baseConnectionString);
+                var client = new MongoClient(finalConnectionString);
                 var database = client.GetDatabase(databaseName);
                 
                 // In MongoDB, a database is not actually created until a collection or document is created.
