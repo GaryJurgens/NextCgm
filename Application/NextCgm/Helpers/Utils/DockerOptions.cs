@@ -11,6 +11,8 @@
         public bool IsLocalDevelopment { get; set; } = true;
         public string DockerNetworkName { get; set; } = "nextcgm_network";
 
+        public string BaseMongoConnectionString { get; set; } = string.Empty;
+
         public List<string> EnvironmentVariables { get; set; } = new List<string>();
         public string TargetIp { get; set; } = String.Empty;
     }
