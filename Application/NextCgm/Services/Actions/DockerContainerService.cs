@@ -49,16 +49,8 @@ namespace NextCgm.Services.Actions
                     };
                 }
 
-                // Find the base Mongo connection string from Docker options
-                string baseMongoConnectionString = string.Empty;
-                foreach (var env in _options.EnvironmentVariables)
-                {
-                    if (env.StartsWith("MONGO_CONNECTION="))
-                    {
-                        baseMongoConnectionString = env.Substring("MONGO_CONNECTION=".Length);
-                        break;
-                    }
-                }
+                // Use the base Mongo connection string from Docker options
+                string baseMongoConnectionString = _options.BaseMongoConnectionString;
 
                 // Create Document DB Database first so we can inject the connection string
                 var dbRequest = new CreateDocumentDbRequestDTO
