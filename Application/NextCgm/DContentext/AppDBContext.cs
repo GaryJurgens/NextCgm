@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using NextCgm.DataEntities;
 using NextCgm.DataEntities.Containers;
 using NextCgm.DataEntities.DocumentDatabases;
@@ -25,6 +25,11 @@ namespace NextCgm.DContentext
         public DbSet<DockerLogger> DockerLogger { get; set; }
 
         public DbSet<UserContainerDatabase> UserContainerDatabases { get; set; }
+
+        public DbSet<NextCgm.DataEntities.Billing.BillingSubscriptionEntity> BillingSubscriptions { get; set; }
+        public DbSet<NextCgm.DataEntities.Billing.SubscriptionPlanEntity> SubscriptionPlans { get; set; }
+        public DbSet<NextCgm.DataEntities.Billing.PaymentTransactionEntity> PaymentTransactions { get; set; }
+        public DbSet<NextCgm.DataEntities.Billing.PaymentMethodEntity> PaymentMethods { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

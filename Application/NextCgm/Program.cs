@@ -59,10 +59,15 @@ builder.Services.Configure<DockerOptions>(
 builder.Services.Configure<DocumentDbOptions>(
     builder.Configuration.GetSection("DocumentDbSettings"));
 
+builder.Services.Configure<NextCgm.Helpers.Utils.PaystackSettings>(
+    builder.Configuration.GetSection("PaystackSettings"));
+
 builder.Services.AddScoped<IDockerContainerService,DockerContainerService>();
 builder.Services.AddScoped<IDocumentDbService,DocumentDbService>();
 builder.Services.AddScoped<IUserService,UserService>();
 builder.Services.AddScoped<ILocationService,LocationService>();
+builder.Services.AddScoped<IBillingSubscriptionService, BillingSubscriptionService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddFastEndpoints();
