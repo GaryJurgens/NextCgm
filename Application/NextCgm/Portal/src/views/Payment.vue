@@ -46,7 +46,7 @@
           <!-- Bottom Part: Cost & Subscribe Button -->
           <div class="plan-footer">
             <div class="plan-price">
-              ZAR {{ plan.price }}
+              {{ plan.currencySymbol }} {{ plan.price }}
               <span class="plan-interval">/mo</span>
             </div>
             <button @click="initiatePayment(plan)" :disabled="loading" class="btn btn-primary w-full">
@@ -80,7 +80,8 @@ const logout = () => {
 
 onMounted(async () => {
   try {
-    const response = await api.getPlans();
+    const userId = getUserId();
+    const response = await api.getPlans({ userId: userId });
     if (response.data && response.data.success) {
       plans.value = response.data.plans;
     }

@@ -9,14 +9,33 @@ import PaymentVerify from '../views/PaymentVerify.vue';
 import { useAuthStore } from '../stores/auth';
 
 const routes = [
-  { path: '/', redirect: '/login' },
-  { path: '/login', component: Login },
-  { path: '/register', component: Register },
-  { path: '/verify-otp', component: VerifyOtp },
-  { path: '/dashboard', component: Dashboard, meta: { requiresAuth: true } },
-  { path: '/payment', component: Payment, meta: { requiresAuth: true } },
-  { path: '/payment-verify', component: PaymentVerify },
-  { path: '/settings', component: Settings, meta: { requiresAuth: true } },
+  { 
+    path: '/', 
+    redirect: to => {
+      // If we land on root with payment reference query params from an external gateway,
+      // redirect to the payment verify page instead of login.
+      if (to.query.reference || to.query.trxref || to.query.transaction_id) {
+        return { path: '/payment-verify', query: to.query };
+      }
+      return '/login';
+    } 
+  },
+  { path: '/login', name: 'Login', component: Login, meta: { isPublic: true } },
+  { path: '/register', name: 'Register', component: Register, meta: { isPublic: true } },
+  { path: '/verify-otp', name: 'VerifyOtp', component: VerifyOtp, meta: { isPublic: true } },
+  { path: '/dashboard', name: 'Dashboard', component: Dashboard, meta: { requiresAuth: true } },
+  { path: '/payment', name: 'Payment', component: Payment, meta: { requiresAuth: true } },
+  { 
+    path: '/payment-verify', 
+    name: 'PaymentVerify', 
+    component: PaymentVerify,
+    // Sensitive to the external gateway's behavior
+    alias: ['/payment-verify/', '/PaymentVerify', '/paymentverify', '/verify', '/verfy'],
+    meta: { isPublic: true } 
+  },
+  { path: '/settings', name: 'Settings', component: Settings, meta: { requiresAuth: true } },
+  // TEMPORARILY: Remove the redirect for unknown paths to see if you get a blank page instead of login
+  { path: '/:pathMatch(.*)*', component: { template: '<div>Route Not Found</div>' } }
 ];
 
 const router = createRouter({
@@ -26,16 +45,29 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
-  // Ensure state is initialized
+  
   if (!authStore.token && localStorage.getItem('token')) {
     authStore.initializeAuth();
   }
-  
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    next('/login');
-  } else {
-    next();
+
+  // LOGGING: Add this temporarily to your console to see what the router thinks is happening
+  console.log('Navigating to:', to.path, 'Is Public:', to.meta.isPublic);
+
+  const pathLower = to.path.toLowerCase();
+  // If the path contains our keyword, force it to be public regardless of metadata
+  if (pathLower.includes('payment-verify') || pathLower.includes('/verify') || pathLower.includes('/verfy')) {
+    return next();
   }
+
+  if (to.meta.isPublic) {
+    return next();
+  }
+
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    return next({ path: '/login', query: { redirect: to.fullPath } });
+  }
+
+  next();
 });
 
 export default router;

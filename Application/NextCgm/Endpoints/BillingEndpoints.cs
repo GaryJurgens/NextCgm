@@ -1,4 +1,5 @@
 using FastEndpoints;
+using Microsoft.EntityFrameworkCore;
 using NextCgm.Services.Actions;
 using NextCgm.Shared.DTOS;
 
@@ -74,7 +75,9 @@ namespace NextCgm.Endpoints
         }
     }
 
-    public class GetPlansRequestDTO {}
+    public class GetPlansRequestDTO {
+        public Guid? UserId { get; set; }
+    }
     public class GetPlansResponseDTO {
         public bool Success { get; set; }
         public string Message { get; set; } = string.Empty;
@@ -87,9 +90,10 @@ namespace NextCgm.Endpoints
         public string FeaturesHtml { get; set; } = string.Empty;
         public decimal Price { get; set; }
         public string PaystackPlanCode { get; set; } = string.Empty;
+        public string CurrencySymbol { get; set; } = string.Empty;
     }
 
-    public class GetPlansEndpoint : EndpointWithoutRequest<GetPlansResponseDTO>
+    public class GetPlansEndpoint : Endpoint<GetPlansRequestDTO, GetPlansResponseDTO>
     {
         private readonly NextCgm.DContentext.AppDBContext _dbContext;
 
@@ -100,7 +104,7 @@ namespace NextCgm.Endpoints
 
         public override void Configure()
         {
-            Get("/api/Billing/GetPlans");
+            Post("/api/Billing/GetPlans");
             AllowAnonymous();
             Summary(s => {
                 s.Summary = "Get active subscription plans";
@@ -108,18 +112,55 @@ namespace NextCgm.Endpoints
             });
         }
 
-        public override async Task HandleAsync(CancellationToken ct)
+        public override async Task HandleAsync(GetPlansRequestDTO req, CancellationToken ct)
         {
-            var plans = _dbContext.SubscriptionPlans
+            bool isSouthAfrica = false;
+            string currencySymbol = "$";
+
+            if (req.UserId.HasValue)
+            {
+                var user = await _dbContext.UserEntities
+                    .Include(u => u.Country)
+                    .FirstOrDefaultAsync(u => u.UserEntityID == req.UserId.Value, ct);
+
+                if (user != null)
+                {
+                    if (user.CountryName.Equals("South Africa", StringComparison.OrdinalIgnoreCase) || 
+                        user.CountryCode.Equals("ZA", StringComparison.OrdinalIgnoreCase))
+                    {
+                        isSouthAfrica = true;
+                    }
+                    else if (user.Country != null && 
+                            (user.Country.Name.Equals("South Africa", StringComparison.OrdinalIgnoreCase) || 
+                             user.Country.Iso2.Equals("ZA", StringComparison.OrdinalIgnoreCase)))
+                    {
+                        isSouthAfrica = true;
+                    }
+
+                    if (user.Country != null && !string.IsNullOrEmpty(user.Country.CurrencySymbol))
+                    {
+                        currencySymbol = user.Country.CurrencySymbol;
+                    }
+                    else if (isSouthAfrica)
+                    {
+                        currencySymbol = "R";
+                    }
+                }
+            }
+
+            var dbPlans = await _dbContext.SubscriptionPlans
                 .Where(p => p.IsActive)
-                .Select(p => new PlanDTO {
-                    Id = p.SubscriptionPlanID,
-                    Name = p.Name,
-                    Description = p.Description,
-                    FeaturesHtml = p.FeaturesHtml,
-                    Price = p.PriceZAR,
-                    PaystackPlanCode = p.PaystackPlanCode
-                }).ToList();
+                .ToListAsync(ct);
+
+            var plans = dbPlans.Select(p => new PlanDTO {
+                Id = p.SubscriptionPlanID,
+                Name = p.Name,
+                Description = p.Description,
+                FeaturesHtml = p.FeaturesHtml,
+                Price = isSouthAfrica ? p.PriceZAR : p.PriceUSD,
+                PaystackPlanCode = p.PaystackPlanCode,
+                CurrencySymbol = currencySymbol
+            }).ToList();
 
             await Send.OkAsync(new GetPlansResponseDTO {
                 Success = true,
