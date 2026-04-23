@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  nginx-ui:
+    image: uozi/nginx-ui:latest
+    container_name: nginx-ui
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # Map host directories for Nginx configs and UI database
+      - ./nginx_data/nginx:/etc/nginx
+      - ./nginx_data/nginx-ui:/etc/nginx-ui
+      # Mount the Docker socket so Nginx UI can interact with Docker if needed
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - NGINX_UI_OFFICIAL_DOCKER=true
+    restart: always
+    networks:
+      - nextcgm_network
+
+  nextcgm-backend:
+    # Replace "yourdockerhubusername" with your actual Docker Hub username
+    image: gary450450/nextcgm-backend:latest
+       # Run as root so the container can access the mounted docker.sock
+    user: root
+    volumes:
+      # Mount the Docker socket so the .NET app can spin up new containers
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Share the exact same Nginx config folder with the nginx-ui container
+      - ./nginx_data/nginx:/app/nginx_data/nginx
+      - ./nginx_data/nginx-ui:/app/nginx_data/nginx-ui
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      # Override appsettings.json to enable VPS mode
+      - DockerSettings__IsLocalDevelopment=false
+      - DockerSettings__DockerNetworkName=nextcgm_network
+    restart: always
+    networks:
+      - nextcgm_network
+
+networks:
+  nextcgm_network:
+    name: nextcgm_network
+    driver: bridge

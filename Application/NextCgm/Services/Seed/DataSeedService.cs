@@ -7,14 +7,15 @@ namespace NextCgm.Services.Seed
     public interface IDataSeedService
     {
         Task<bool> IsDataSeededAsync();
+
         Task SeedCountriesAndStatesAsync();
     }
 
     public class DataSeedService : IDataSeedService
     {
-
         private readonly DContentext.AppDBContext _context;
         private readonly ILogger<DataSeedService> _logger;
+
         public DataSeedService(DContentext.AppDBContext context, ILogger<DataSeedService> logger)
         {
             _context = context;
@@ -57,7 +58,7 @@ namespace NextCgm.Services.Seed
 
                 var countries = new List<CountryList>();
                 var states = new List<ProvinceStateList>();
-                var timezones = new List<TimeZones>();
+                var timezones = new List<TimeZoneData>();
 
                 foreach (var countryData in countriesData)
                 {
@@ -95,9 +96,9 @@ namespace NextCgm.Services.Seed
                     {
                         foreach (var tzData in countryData.Timezones)
                         {
-                            var timezone = new TimeZones
+                            var timezone = new TimeZoneData
                             {
-                                TimeZoneID = Medo.Uuid7.NewUuid7().ToGuid(),
+                                TimeZoneDataID = Medo.Uuid7.NewUuid7().ToGuid(),
                                 ZoneName = tzData.ZoneName,
                                 GmtOffset = tzData.GmtOffset,
                                 GmtOffsetName = tzData.GmtOffsetName,
@@ -133,7 +134,7 @@ namespace NextCgm.Services.Seed
 
                 // Bulk insert all entities
                 await _context.CountryLists.AddRangeAsync(countries);
-                await _context.TimeZones.AddRangeAsync(timezones);
+                await _context.TimeZoneData.AddRangeAsync(timezones);
                 await _context.ProvinceStateLists.AddRangeAsync(states);
 
                 await _context.SaveChangesAsync();
@@ -147,10 +148,8 @@ namespace NextCgm.Services.Seed
                 throw;
             }
         }
-
-
-
     }
+
     // JSON mapping classes
     public class CountryData
     {
@@ -215,13 +214,13 @@ namespace NextCgm.Services.Seed
         public string? EmojiU { get; set; }
 
         [JsonProperty("timezones")]
-        public List<TimezoneData>? Timezones { get; set; }
+        public List<Timezones>? Timezones { get; set; }
 
         [JsonProperty("states")]
         public List<StateData>? States { get; set; }
     }
 
-    public class TimezoneData
+    public class Timezones
     {
         [JsonProperty("zoneName")]
         public string ZoneName { get; set; } = string.Empty;
@@ -259,7 +258,4 @@ namespace NextCgm.Services.Seed
         [JsonProperty("type")]
         public string? Type { get; set; }
     }
-
-}
-
 }

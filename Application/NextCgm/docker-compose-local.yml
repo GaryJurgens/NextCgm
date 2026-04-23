@@ -1,0 +1,66 @@
+services:
+  # --- Traefik Reverse Proxy ---
+  traefik:
+    image: traefik:latest
+    container_name: traefik
+    restart: unless-stopped
+    command:
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - nextcgm_network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.localhost`)"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.middlewares=auth"
+      - "traefik.http.middlewares.auth.basicauth.users=Admin:$$apr1$$H6uskkkW$$IgXLP6ewTrSuBkTrqE8wj/" # Admin:placeholder
+
+  # --- Cloudflare Tunnel ---
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    restart: unless-stopped
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=YOUR_TUNNEL_TOKEN
+    networks:
+      - nextcgm_network
+
+  # --- Your C# Backend ---
+  nextcgm-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: gary450450/nextcgm-backend:latest
+    container_name: nextcgm-backend
+    user: root
+    # Port 5000 remains exposed for direct IP testing, 
+    # but Traefik will talk to it internally.
+    ports:
+      - "5000:5000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:5000
+      - DockerSettings__IsLocalDevelopment=false
+      - DockerSettings__DockerNetworkName=nextcgm_network
+    restart: always
+    networks:
+      - nextcgm_network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`api.localhost`)" # Use api.localhost for local testing
+      - "traefik.http.services.backend.loadbalancer.server.port=5000"
+
+networks:
+  nextcgm_network:
+    name: nextcgm_network
+    driver: bridge

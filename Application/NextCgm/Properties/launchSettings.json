@@ -18,14 +18,17 @@
     },
     "Container (Dockerfile)": {
       "commandName": "Docker",
-      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/swagger",
       "environmentVariables": {
-        "ASPNETCORE_HTTPS_PORTS": "8081",
-        "ASPNETCORE_HTTP_PORTS": "8080"
+        "ASPNETCORE_HTTPS_PORTS": "5001",
+        "ASPNETCORE_HTTP_PORTS": "5000",
+        "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "publishAllPorts": true,
-      "useSSL": true
+      "httpPort": 32771,
+      "publishAllPorts": false,
+      "useSSL": false,
+      "DockerfileRunArguments": "-v /var/run/docker.sock:/var/run/docker.sock -u root"
     }
   },
-  "$schema": "https://json.schemastore.org/launchsettings.json"
+    "$schema": "https://json.schemastore.org/launchsettings.json"
 }

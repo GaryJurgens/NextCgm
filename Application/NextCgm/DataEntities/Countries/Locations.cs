@@ -3,19 +3,16 @@ using Newtonsoft.Json;
 using NextCgm.DataEntities.User;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.Metrics;
 
 namespace NextCgm.DataEntities.Locations
 {
-
-
     /// <summary>
     /// A lookup table containing comprehensive country details (ISO codes, currency, etc.).
     /// Acts as the parent entity for ProvinceStateList and TimeZones to provide a geographical hierarchy.
     /// </summary>
     public class CountryList
     {
-        public Guid CountryListID = Uuid7.NewGuid();
+        public Guid CountryListID { get; set; } = Uuid7.NewUuid7();
 
         [Required]
         [MaxLength(100)]
@@ -78,12 +75,10 @@ namespace NextCgm.DataEntities.Locations
         // Navigation properties
         public ICollection<ProvinceStateList> ProvinceStates { get; set; } = new List<ProvinceStateList>();
 
-        public ICollection<TimeZones> TimeZones { get; set; } = new List<TimeZones>();
+        public ICollection<TimeZoneData> TimeZones { get; set; } = new List<TimeZoneData>();
 
         public ICollection<UserEntity> Users { get; set; } = new List<UserEntity>();
     }
-
-
 
     /// <summary>
     /// Represents states or provinces within a country.
@@ -91,7 +86,7 @@ namespace NextCgm.DataEntities.Locations
     /// </summary>
     public class ProvinceStateList
     {
-        public Guid ProvinceStateListID = Medo.Uuid7.NewGuid();
+        public Guid ProvinceStateListID { get; set; } = Medo.Uuid7.NewUuid7();
 
         [Required]
         [MaxLength(100)]
@@ -119,9 +114,9 @@ namespace NextCgm.DataEntities.Locations
     /// Represents time zones.
     /// Links to CountryList to associate valid time zones with specific countries.
     /// </summary>
-    public class TimeZones
+    public class TimeZoneData
     {
-        public Guid TimeZoneID { get; set; } = Medo.Uuid7.NewGuid();
+        public Guid TimeZoneDataID { get; set; } = Medo.Uuid7.NewGuid();
 
         [Required]
         [MaxLength(100)]
@@ -155,7 +150,4 @@ namespace NextCgm.DataEntities.Locations
 
         public ICollection<UserEntity> Users { get; } = new List<UserEntity>();
     }
-
-
-
 }

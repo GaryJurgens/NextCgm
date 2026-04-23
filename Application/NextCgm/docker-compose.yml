@@ -1,0 +1,86 @@
+services:
+  # --- Traefik Reverse Proxy ---
+  traefik:
+    image: traefik:latest
+    container_name: traefik
+    restart: unless-stopped
+    command:
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - nextcgm_network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.nextcgm.co.za`)"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.middlewares=auth"
+      - "traefik.http.middlewares.auth.basicauth.users=Admin:$$2y$$05$$azPZO1LbEawB.vOyiguU5.yRSfFHFQNoLuiYENqltSr95yw5F7S42" # Admin:r669zXtMmJC*n16
+
+  # --- Cloudflare Tunnel ---
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    restart: unless-stopped
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=eyJhIjoiOTExZDkyOWM0MjAzZTc2OTE3NTgzZjdjMGJiMTlhN2YiLCJ0IjoiMzdiMjk2ZWQtOTlhZi00MDI2LWJmOGEtZGUxODdiNDA2Y2RkIiwicyI6Ik56azRZMkl5WmpBdE0yUXdaaTAwTkRNd0xXRXdZemt0WWpKaFpESmtNekUzWlRFeSJ9
+    networks:
+      - nextcgm_network
+
+  # --- NextCgm Backend ---
+  nextcgm-backend:
+    image: gary450450/nextcgm-backend:latest
+    container_name: nextcgm-backend
+    user: root
+    ports:
+      - "5000:5000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:5000
+      - DockerSettings__IsLocalDevelopment=false
+      - DockerSettings__DockerNetworkName=nextcgm_network
+    restart: always
+    networks:
+      - nextcgm_network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`api.nextcgm.co.za`)"
+      - "traefik.http.services.backend.loadbalancer.server.port=5000"
+
+  # --- Nightscout (CGM Remote Monitor) ---
+  nightscout:
+    image: nightscout/cgm-remote-monitor:latest
+    container_name: nightscout
+    restart: always
+    ports:
+      - "1337:1337"
+    environment:
+      - INSECURE_USE_HTTP=true
+      - API_SECRET=adolfieoros450450
+      - MONGO_CONNECTION=mongodb://nightscoutcgm:C7NLstoHoeTC6c5KPef2Wd2Zfq0YRd2MCj7Yvy8jSzPxvtO15rxofBqLtNaldK5X498BGnAdqcTQACDbrowASQ%3D%3D@nightscoutcgm.mongo.cosmos.azure.com:10255/nightscout?ssl=true&appName=%40nightscoutcgm%40&retryWrites=false&replicaSet=globaldb&readPreference=primary&maxIdleTimeMS=120000&connectTimeoutMS=10000&authSource=admin&authMechanism=SCRAM-SHA-1
+      - DISPLAY_UNITS=mmol/L
+      - ALARM_TYPES=none
+      - ALARM_URGENT_HIGH=off
+      - ALARM_HIGH=off
+      - ALARM_LOW=off
+      - ALARM_URGENT_LOW=off
+      - ALARM_TIMEAGO_WARN=off
+      - ALARM_TIMEAGO_URGENT=off
+      - SHOW_FORECAST=true
+      - DBSIZE_MAX=20000
+      - DBSIZE_IN_MB=true
+    networks:
+      - nextcgm_network
+
+networks:
+  nextcgm_network:
+    name: nextcgm_network
+    driver: bridge

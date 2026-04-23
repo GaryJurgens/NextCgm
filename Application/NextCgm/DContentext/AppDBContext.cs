@@ -1,4 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using NextCgm.DataEntities;
+using NextCgm.DataEntities.Containers;
+using NextCgm.DataEntities.DocumentDatabases;
 using NextCgm.DataEntities.Locations;
 using NextCgm.DataEntities.User;
 
@@ -8,7 +11,6 @@ namespace NextCgm.DContentext
     {
         public AppDBContext(DbContextOptions<AppDBContext> options) : base(options)
         {
-
         }
 
         public DbSet<UserEntity> UserEntities { get; set; }
@@ -16,9 +18,28 @@ namespace NextCgm.DContentext
 
         public DbSet<ProvinceStateList> ProvinceStateLists { get; set; }
 
-        public DbSet<TimeZones> TimeZones { get; set; }
+        public DbSet<TimeZoneData> TimeZoneData { get; set; }
 
+        public DbSet<DockerContainers> DockerContainers { get; set; }
 
+        public DbSet<DockerLogger> DockerLogger { get; set; }
 
+        public DbSet<UserContainerDatabase> UserContainerDatabases { get; set; }
+
+        public DbSet<NextCgm.DataEntities.Billing.BillingSubscriptionEntity> BillingSubscriptions { get; set; }
+        public DbSet<NextCgm.DataEntities.Billing.SubscriptionPlanEntity> SubscriptionPlans { get; set; }
+        public DbSet<NextCgm.DataEntities.Billing.PaymentTransactionEntity> PaymentTransactions { get; set; }
+        public DbSet<NextCgm.DataEntities.Billing.PaymentMethodEntity> PaymentMethods { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<UserEntity>()
+                .HasIndex(u => u.UserSubDomain)
+                .IsUnique();
+
+            modelBuilder.Entity<UserEntity>()
+                .HasIndex(u => u.ApiKeyForNightScout)
+                .IsUnique();
+        }
     }
 }
