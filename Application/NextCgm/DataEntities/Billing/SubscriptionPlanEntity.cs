@@ -12,6 +12,8 @@ namespace NextCgm.DataEntities.Billing
         
         public string Description { get; set; } = string.Empty;
         
+        public string FeaturesHtml { get; set; } = string.Empty;
+
         // Price in South African Rands (ZAR)
         public decimal PriceZAR { get; set; }
         
@@ -22,6 +24,8 @@ namespace NextCgm.DataEntities.Billing
         
         // Interval in months (e.g., 1 for monthly, 12 for annual)
         public int BillingCycleMonths { get; set; } = 1;
+        
+        public string PaystackPlanCode { get; set; } = string.Empty;
         
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime LastUpdatedAt { get; set; } = DateTime.UtcNow;

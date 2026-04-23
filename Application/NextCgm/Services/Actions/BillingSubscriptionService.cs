@@ -11,6 +11,7 @@ namespace NextCgm.Services.Actions
         Task<CreateSubscriptionResponseDTO> CreateSubscriptionAsync(CreateSubscriptionRequestDTO request);
         Task<GetSubscriptionResponseDTO> GetSubscriptionAsync(GetSubscriptionRequestDTO request);
         Task<GetUserSubscriptionsResponseDTO> GetUserSubscriptionsAsync(GetUserSubscriptionsRequestDTO request);
+        Task<CancelSubscriptionResponseDTO> CancelSubscriptionAsync(CancelSubscriptionRequestDTO request);
     }
 
     public class BillingSubscriptionService : IBillingSubscriptionService
@@ -96,6 +97,9 @@ namespace NextCgm.Services.Actions
                     CurrentPeriodStart = entity.CurrentPeriodStart,
                     CurrentPeriodEnd = entity.CurrentPeriodEnd,
                     CanceledAt = entity.CanceledAt,
+                    FailedChargeAttempts = entity.FailedChargeAttempts,
+                    NextRetryDate = entity.NextRetryDate,
+                    GracePeriodEndDate = entity.GracePeriodEndDate,
                     PaystackSubscriptionCode = entity.PaystackSubscriptionCode,
                     PaystackCustomerCode = entity.PaystackCustomerCode,
                     CreatedAt = entity.CreatedAt,
@@ -112,6 +116,25 @@ namespace NextCgm.Services.Actions
             catch (Exception ex)
             {
                 return GetSubscriptionResponseDTO.Failure($"Error retrieving subscription: {ex.Message}");
+            }
+        }
+
+        public async Task<CancelSubscriptionResponseDTO> CancelSubscriptionAsync(CancelSubscriptionRequestDTO request)
+        {
+            try
+            {
+                var sub = await _context.BillingSubscriptions.FindAsync(request.SubscriptionId);
+                if (sub == null) return new CancelSubscriptionResponseDTO { Success = false, Message = "Not found" };
+
+                sub.Status = "canceled";
+                sub.LastUpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+
+                return new CancelSubscriptionResponseDTO { Success = true, Message = "Canceled successfully" };
+            }
+            catch(Exception ex)
+            {
+                return new CancelSubscriptionResponseDTO { Success = false, Message = ex.Message };
             }
         }
 
@@ -132,6 +155,9 @@ namespace NextCgm.Services.Actions
                     CurrentPeriodStart = entity.CurrentPeriodStart,
                     CurrentPeriodEnd = entity.CurrentPeriodEnd,
                     CanceledAt = entity.CanceledAt,
+                    FailedChargeAttempts = entity.FailedChargeAttempts,
+                    NextRetryDate = entity.NextRetryDate,
+                    GracePeriodEndDate = entity.GracePeriodEndDate,
                     PaystackSubscriptionCode = entity.PaystackSubscriptionCode,
                     PaystackCustomerCode = entity.PaystackCustomerCode,
                     CreatedAt = entity.CreatedAt,

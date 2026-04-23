@@ -137,6 +137,7 @@ namespace NextCgm.Services.Actions
 
                 var viewModel = new UserApiViewModel
                 {
+                    UserEntityID = newUser.UserEntityID,
                     FirstName = newUser.FirstName,
                     LastName = newUser.LastName,
                     UserSubDomain = $"{newUser.UserSubDomain}{_dockerOptions.EndDomain}",
@@ -245,6 +246,7 @@ namespace NextCgm.Services.Actions
 
             var viewModel = new UserApiViewModel
             {
+                UserEntityID = user.UserEntityID,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 UserSubDomain = $"{user.UserSubDomain}{_dockerOptions.EndDomain}",

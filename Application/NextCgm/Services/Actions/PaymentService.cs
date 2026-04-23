@@ -85,9 +85,15 @@ namespace NextCgm.Services.Actions
                     reference = reference,
                     callback_url = _paystackSettings.CallbackUrl,
                     currency = currency,
+                    channels = new[] { "card" }, // Force card channel to ensure we get a reusable authorization code
                     metadata = new {
                         userId = request.UserEntityID.ToString(),
-                        planId = request.PlanId
+                        planId = request.PlanId,
+                        custom_fields = new[]
+                        {
+                            new { display_name = "User ID", variable_name = "userId", value = request.UserEntityID.ToString() },
+                            new { display_name = "Plan ID", variable_name = "planId", value = request.PlanId }
+                        }
                     }
                 };
 

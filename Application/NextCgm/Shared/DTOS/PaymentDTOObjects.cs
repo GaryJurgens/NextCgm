@@ -37,6 +37,7 @@ namespace NextCgm.Shared.DTOS
         public string callback_url { get; set; } = string.Empty;
         public string currency { get; set; } = "ZAR"; // Or whatever currency is configured
         public string[] channels { get; set; } = new[] { "card" };
+        public string? plan { get; set; }
         public object? metadata { get; set; }
     }
 

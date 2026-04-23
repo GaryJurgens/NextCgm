@@ -5,6 +5,7 @@ namespace NextCgm.Shared.ApiViewModels
 {
     public class UserApiViewModel
     {
+        public Guid UserEntityID { get; set; }
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
         public string EmailUsername { get; set; } = string.Empty;

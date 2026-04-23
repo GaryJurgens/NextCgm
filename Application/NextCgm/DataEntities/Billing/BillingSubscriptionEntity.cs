@@ -19,6 +19,11 @@ namespace NextCgm.DataEntities.Billing
         public string PaystackSubscriptionCode { get; set; } = string.Empty;
         public string PaystackCustomerCode { get; set; } = string.Empty;
 
+        // Retry logic tracking
+        public int FailedChargeAttempts { get; set; } = 0;
+        public DateTime? NextRetryDate { get; set; }
+        public DateTime? GracePeriodEndDate { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime LastUpdatedAt { get; set; } = DateTime.UtcNow;
     }

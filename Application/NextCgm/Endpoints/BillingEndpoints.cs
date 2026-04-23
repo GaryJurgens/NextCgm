@@ -74,6 +74,95 @@ namespace NextCgm.Endpoints
         }
     }
 
+    public class GetPlansRequestDTO {}
+    public class GetPlansResponseDTO {
+        public bool Success { get; set; }
+        public string Message { get; set; } = string.Empty;
+        public List<PlanDTO> Plans { get; set; } = new();
+    }
+    public class PlanDTO {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string FeaturesHtml { get; set; } = string.Empty;
+        public decimal Price { get; set; }
+        public string PaystackPlanCode { get; set; } = string.Empty;
+    }
+
+    public class GetPlansEndpoint : EndpointWithoutRequest<GetPlansResponseDTO>
+    {
+        private readonly NextCgm.DContentext.AppDBContext _dbContext;
+
+        public GetPlansEndpoint(NextCgm.DContentext.AppDBContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+
+        public override void Configure()
+        {
+            Get("/api/Billing/GetPlans");
+            AllowAnonymous();
+            Summary(s => {
+                s.Summary = "Get active subscription plans";
+                s.Description = "Retrieves all active subscription plans from the database.";
+            });
+        }
+
+        public override async Task HandleAsync(CancellationToken ct)
+        {
+            var plans = _dbContext.SubscriptionPlans
+                .Where(p => p.IsActive)
+                .Select(p => new PlanDTO {
+                    Id = p.SubscriptionPlanID,
+                    Name = p.Name,
+                    Description = p.Description,
+                    FeaturesHtml = p.FeaturesHtml,
+                    Price = p.PriceZAR,
+                    PaystackPlanCode = p.PaystackPlanCode
+                }).ToList();
+
+            await Send.OkAsync(new GetPlansResponseDTO {
+                Success = true,
+                Plans = plans
+            }, ct);
+        }
+    }
+
+    public class CancelSubscriptionEndpoint : Endpoint<CancelSubscriptionRequestDTO, CancelSubscriptionResponseDTO>
+    {
+        private readonly IBillingSubscriptionService _billingService;
+
+        public CancelSubscriptionEndpoint(IBillingSubscriptionService billingService)
+        {
+            _billingService = billingService;
+        }
+
+        public override void Configure()
+        {
+            Post("/api/Billing/CancelSubscription");
+            AllowAnonymous();
+            Summary(s =>
+            {
+                s.Summary = "Cancel subscription";
+                s.Description = "Cancels a recurring billing subscription.";
+            });
+        }
+
+        public override async Task HandleAsync(CancelSubscriptionRequestDTO req, CancellationToken ct)
+        {
+            var response = await _billingService.CancelSubscriptionAsync(req);
+
+            if (response.Success)
+            {
+                await Send.OkAsync(response, ct);
+            }
+            else
+            {
+                await Send.OkAsync(response, ct);
+            }
+        }
+    }
+
     public class GetUserSubscriptionsEndpoint : Endpoint<GetUserSubscriptionsRequestDTO, GetUserSubscriptionsResponseDTO>
     {
         private readonly IBillingSubscriptionService _billingService;

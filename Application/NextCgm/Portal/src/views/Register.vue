@@ -66,8 +66,10 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '../services/api';
+import { useAuthStore } from '../stores/auth';
 
 const router = useRouter();
+const authStore = useAuthStore();
 const firstName = ref('');
 const lastName = ref('');
 const email = ref('');
@@ -135,7 +137,7 @@ const handleRegister = async () => {
       }
     });
     if (response.data.success) {
-      localStorage.setItem('emailForOtp', email.value);
+      authStore.setEmailForOtp(email.value);
       router.push('/verify-otp');
     } else {
       error.value = response.data.message || 'Registration failed';

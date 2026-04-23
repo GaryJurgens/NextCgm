@@ -24,15 +24,17 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '../services/api';
+import { useAuthStore } from '../stores/auth';
 
 const router = useRouter();
+const authStore = useAuthStore();
 const otp = ref('');
 const email = ref('');
 const loading = ref(false);
 const error = ref('');
 
 onMounted(() => {
-  email.value = localStorage.getItem('emailForOtp') || '';
+  email.value = authStore.emailForOtp || localStorage.getItem('emailForOtp') || '';
   if (!email.value) {
     router.push('/login');
   }
@@ -47,9 +49,8 @@ const handleVerify = async () => {
       VerificationCode: otp.value
     });
     if (response.data.success) {
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.payload));
-      localStorage.removeItem('emailForOtp');
+      authStore.setToken(response.data.token);
+      authStore.setUser(response.data.payload);
       router.push('/dashboard');
     } else {
       error.value = response.data.message || 'Verification failed';

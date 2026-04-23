@@ -7,6 +7,8 @@
           <span class="logo-text">NextCGM</span>
         </div>
         <div class="navbar-actions">
+          <router-link to="/payment" class="btn btn-sm btn-outline-primary mr-3">Plans</router-link>
+          <router-link to="/settings" class="btn btn-sm btn-outline-primary mr-3">Settings</router-link>
           <span class="welcome-text">Welcome, {{ user?.firstName }}</span>
           <button @click="logout" class="btn btn-sm btn-danger-outline ml-3">Logout</button>
         </div>
@@ -97,12 +99,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '../services/api';
+import { useAuthStore } from '../stores/auth';
 
 const router = useRouter();
-const user = ref(null);
+const authStore = useAuthStore();
+const user = computed(() => authStore.user);
 const containers = ref([]);
 const creating = ref(false);
 const createError = ref('');
@@ -119,11 +123,9 @@ const fetchContainers = async () => {
 };
 
 onMounted(() => {
-  const userData = localStorage.getItem('user');
-  if (userData) {
-    user.value = JSON.parse(userData);
-    if (user.value.dockerContainers) {
-      containers.value = user.value.dockerContainers;
+  if (authStore.isAuthenticated && authStore.user) {
+    if (authStore.user.dockerContainers) {
+      containers.value = authStore.user.dockerContainers;
     }
     // Fetch latest containers
     fetchContainers();
@@ -133,8 +135,7 @@ onMounted(() => {
 });
 
 const logout = () => {
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
+  authStore.logout();
   router.push('/login');
 };
 
@@ -251,6 +252,10 @@ const getStatusClass = (status) => {
 
 .ml-3 {
   margin-left: 1rem;
+}
+
+.mr-3 {
+  margin-right: 1rem;
 }
 
 /* Main Container */

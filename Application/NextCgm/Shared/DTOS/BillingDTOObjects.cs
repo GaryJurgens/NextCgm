@@ -57,6 +57,17 @@ namespace NextCgm.Shared.DTOS
         public Guid UserEntityID { get; set; }
     }
 
+    public class CancelSubscriptionRequestDTO
+    {
+        public Guid SubscriptionId { get; set; }
+    }
+
+    public class CancelSubscriptionResponseDTO
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; } = string.Empty;
+    }
+
     public class GetUserSubscriptionsResponseDTO
     {
         public bool Success { get; set; }

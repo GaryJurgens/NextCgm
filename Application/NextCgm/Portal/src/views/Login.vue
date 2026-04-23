@@ -27,8 +27,10 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '../services/api';
+import { useAuthStore } from '../stores/auth';
 
 const router = useRouter();
+const authStore = useAuthStore();
 const email = ref('');
 const password = ref('');
 const loading = ref(false);
@@ -44,7 +46,7 @@ const handleLogin = async () => {
     });
     if (response.data.success) {
       // Login sends OTP, so we redirect to Verify OTP
-      localStorage.setItem('emailForOtp', email.value);
+      authStore.setEmailForOtp(email.value);
       router.push('/verify-otp');
     } else {
       error.value = response.data.message || 'Login failed';

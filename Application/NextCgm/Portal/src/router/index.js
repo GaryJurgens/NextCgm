@@ -3,6 +3,10 @@ import Login from '../views/Login.vue';
 import Register from '../views/Register.vue';
 import Dashboard from '../views/Dashboard.vue';
 import VerifyOtp from '../views/VerifyOtp.vue';
+import Payment from '../views/Payment.vue';
+import Settings from '../views/Settings.vue';
+import PaymentVerify from '../views/PaymentVerify.vue';
+import { useAuthStore } from '../stores/auth';
 
 const routes = [
   { path: '/', redirect: '/login' },
@@ -10,6 +14,9 @@ const routes = [
   { path: '/register', component: Register },
   { path: '/verify-otp', component: VerifyOtp },
   { path: '/dashboard', component: Dashboard, meta: { requiresAuth: true } },
+  { path: '/payment', component: Payment, meta: { requiresAuth: true } },
+  { path: '/payment-verify', component: PaymentVerify },
+  { path: '/settings', component: Settings, meta: { requiresAuth: true } },
 ];
 
 const router = createRouter({
@@ -18,8 +25,13 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('token');
-  if (to.meta.requiresAuth && !token) {
+  const authStore = useAuthStore();
+  // Ensure state is initialized
+  if (!authStore.token && localStorage.getItem('token')) {
+    authStore.initializeAuth();
+  }
+  
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     next('/login');
   } else {
     next();
