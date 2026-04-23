@@ -49,8 +49,8 @@ export default {
   verifyPayment(data) {
     return api.post('/Payment/Verify', data);
   },
-  getPlans() {
-    return api.get('/Billing/GetPlans');
+  getPlans(data) {
+    return api.post('/Billing/GetPlans', data);
   },
   getUserSubscriptions(data) {
     return api.post('/Billing/GetUserSubscriptions', data);

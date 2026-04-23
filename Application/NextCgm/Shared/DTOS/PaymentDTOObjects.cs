@@ -69,6 +69,7 @@ namespace NextCgm.Shared.DTOS
         public decimal amount { get; set; }
         public PaystackCustomer customer { get; set; } = new();
         public PaystackAuthorization authorization { get; set; } = new();
+        public System.Text.Json.JsonElement? metadata { get; set; }
     }
 
     public class PaystackCustomer

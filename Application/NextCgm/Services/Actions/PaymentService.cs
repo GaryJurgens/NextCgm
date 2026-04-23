@@ -72,8 +72,10 @@ namespace NextCgm.Services.Actions
                     isSouthAfrica = true;
                 }
 
-                string currency = isSouthAfrica ? "ZAR" : "USD";
-                decimal amountToCharge = isSouthAfrica ? plan.PriceZAR : plan.PriceUSD;
+                // Force ZAR for Paystack as South African Paystack accounts only support ZAR transactions.
+                // The frontend will display the USD price to non-SA users, but the actual charge will be processed in ZAR.
+                string currency = "ZAR";
+                decimal amountToCharge = plan.PriceZAR;
 
                 var reference = Guid.NewGuid().ToString();
                 var amountInKobo = (int)(amountToCharge * 100);
@@ -201,9 +203,19 @@ namespace NextCgm.Services.Actions
                     var existingSubscription = await _dbContext.BillingSubscriptions
                         .FirstOrDefaultAsync(b => b.PaystackCustomerCode == result.data.customer.customer_code);
 
+                    string planId = "";
+                    if (result.data.metadata.HasValue && result.data.metadata.Value.TryGetProperty("planId", out var planIdElement))
+                    {
+                        planId = planIdElement.GetString() ?? "";
+                    }
+
                     if (existingSubscription != null)
                     {
                         existingSubscription.Status = "active";
+                        if (!string.IsNullOrEmpty(planId))
+                        {
+                            existingSubscription.SubscriptionPlanId = planId;
+                        }
                         existingSubscription.LastUpdatedAt = DateTime.UtcNow;
                         existingSubscription.CurrentPeriodEnd = DateTime.UtcNow.AddMonths(1); // update period
                         
@@ -215,6 +227,7 @@ namespace NextCgm.Services.Actions
                         var newSub = new BillingSubscriptionEntity
                         {
                             UserEntityID = userId.Value,
+                            SubscriptionPlanId = planId,
                             Status = "active",
                             PaystackCustomerCode = result.data.customer.customer_code,
                             PaystackSubscriptionCode = result.data.authorization?.authorization_code ?? "",

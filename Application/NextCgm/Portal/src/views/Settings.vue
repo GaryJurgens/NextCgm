@@ -105,9 +105,9 @@ const loadSubscriptions = async () => {
       userEntityID: userId
     });
 
-    if (response.data && response.data.success && response.data.subscriptions && response.data.subscriptions.length > 0) {
-      const activeSub = response.data.subscriptions.find(s => s.status === 'active');
-      const failedSub = response.data.subscriptions.find(s => s.status === 'past_due');
+    if (response.data && response.data.success && response.data.payload && response.data.payload.length > 0) {
+      const activeSub = response.data.payload.find(s => s.status === 'active');
+      const failedSub = response.data.payload.find(s => s.status === 'past_due');
 
       if (failedSub) {
         hasFailedSubscription.value = true;
